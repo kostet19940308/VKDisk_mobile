@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         URI uri = URI.create(loginUrl);
-        //webView.setWebViewClient(new OAuthWebClient());
+        webView.setWebViewClient(new OAuthWebClient());
         webView.loadUrl(uri.toString());
     }
 
