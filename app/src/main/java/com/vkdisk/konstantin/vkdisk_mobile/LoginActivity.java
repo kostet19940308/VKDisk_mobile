@@ -3,19 +3,34 @@ package com.vkdisk.konstantin.vkdisk_mobile;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.http.SslError;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.vkdisk.konstantin.vkdisk_mobile.retrofit.SessionApi;
+
+import java.io.IOException;
 import java.net.URI;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public final String LOG_TAG = this.getClass().getSimpleName();
+
     private WebView webView;
     private String loginUrl;
+    private String cookie;
 
     public static Intent createAuthActivityIntent(Context context) {
         Intent intent = new Intent(context, LoginActivity.class);
@@ -29,8 +44,7 @@ public class LoginActivity extends AppCompatActivity {
 
         webView = (WebView) findViewById(R.id.web_view);
         webView.getSettings().setJavaScriptEnabled(true);
-        //loginUrl = "https://oauth.vk.com/authorize?response_type=code&display=page&state=5VuJZZdyMGyZHJVn0dcGwRUqRMfsQz56&redirect_uri=https%3A%2F%2Foauth.vk.com%2Fblank.html%3Fredirect_state%3D5VuJZZdyMGyZHJVn0dcGwRUqRMfsQz56&scope=email+status+docs+messages&client_id=6385626";
-        loginUrl = "http://10.0.2.2:8000/social/login/vk-oauth2/";
+        loginUrl = getString(R.string.auth_url);
     }
 
     @Override
@@ -49,13 +63,43 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         public boolean shouldOverrideUrlLoading(WebView view, String url){
-            Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
+            Log.d(LOG_TAG, url);
+            if(url.startsWith(webView.getResources().getString(R.string.redirect_url))){
+                url.indexOf("#");
+                String substring = url.substring(url.indexOf("#")+1, url.length());
+                String[] urls = substring.split("&");
+                final String code = urls[0].split("=")[1];
+                String state = urls[1].split("=")[1];
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(webView.getResources().getString(R.string.basic_url))
+                        .build();
+                SessionApi getSession = retrofit.create(SessionApi.class);
+                getSession.getSession(code, state).enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                         Log.d(LOG_TAG, response.headers().toString());
+                         cookie = response.headers().get("Set-Cookie");
+                         Log.d(LOG_TAG, cookie);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        System.out.println(t.getMessage());
+                    }
+                });
+
+            }
             view.loadUrl(url);
             return false;
         }
 
         public void onReceivedError(WebView view, int errorCode, String description, String  failingUrl) {
             Toast.makeText(getApplicationContext(), "Oh no! " + description, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            handler.proceed(); // Ignore SSL certificate errors
         }
 
     }
