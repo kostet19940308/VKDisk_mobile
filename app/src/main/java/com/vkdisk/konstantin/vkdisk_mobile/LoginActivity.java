@@ -37,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     private String loginUrl;
     private String cookie;
     private String cookies;
+    private String redirectUrl;
 
     public static Intent createAuthActivityIntent(Context context) {
         Intent intent = new Intent(context, LoginActivity.class);
@@ -51,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         webView = (WebView) findViewById(R.id.web_view);
         webView.getSettings().setJavaScriptEnabled(true);
         loginUrl = getString(R.string.auth_url);
+        redirectUrl = getString(R.string.redirect_url);
     }
 
     @Override
@@ -59,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         URI uri = URI.create(loginUrl);
         CookieManager.getInstance().setAcceptCookie(true);
         webView.setWebViewClient(new OAuthWebClient());
+        webView.setWebChromeClient(new android.webkit.WebChromeClient() {});
         webView.loadUrl(uri.toString());
     }
 
@@ -72,15 +75,18 @@ public class LoginActivity extends AppCompatActivity {
         public boolean shouldOverrideUrlLoading(WebView view, String url){
             Log.d(LOG_TAG, url);
 
-            if(url.startsWith(webView.getResources().getString(R.string.redirect_url))){
+            if(url.startsWith(redirectUrl)){
                 url.indexOf("#");
                 String substring = url.substring(url.indexOf("#")+1, url.length());
                 String[] urls = substring.split("&");
                 final String code = urls[0].split("=")[1];
                 String state = urls[1].split("=")[1];
                 HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-                interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
-                OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+                interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+                OkHttpClient client = new OkHttpClient.Builder()
+//                        .addInterceptor(interceptor)
+                        .addNetworkInterceptor(interceptor)
+                        .build();
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(webView.getResources().getString(R.string.basic_url))
                         .client(client)
@@ -89,20 +95,23 @@ public class LoginActivity extends AppCompatActivity {
                 getSession.getSession(code, state, cookies).enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                         Log.d(LOG_TAG, response.headers().toString());
-                         cookie = response.headers().toMultimap().get("Set-Cookie").get(0);
-                         cookies += "; " + cookie.substring(0, cookie.indexOf(";"));
-                         //cookies = cookie.substring(0, cookie.indexOf(";"));
-                         Log.d(LOG_TAG, cookies);
-                         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-                         interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
-                         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-                         Retrofit retrofit = new Retrofit.Builder()
+                        Log.d(LOG_TAG, response.headers().toString());
+                        cookie = response.headers().toMultimap().get("Set-Cookie").get(0);
+                        cookies += "; " + cookie.substring(0, cookie.indexOf(";"));
+                        //cookies = cookie.substring(0, cookie.indexOf(";"));
+                        Log.d(LOG_TAG, cookies);
+                        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+                        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+                        OkHttpClient client = new OkHttpClient.Builder()
+                                .addInterceptor(interceptor)
+//                                .addNetworkInterceptor(interceptor)
+                                .build();
+                        Retrofit retrofit = new Retrofit.Builder()
                                 .baseUrl(webView.getResources().getString(R.string.basic_url))
                                 .client(client)
                                 .build();
-                         DocumentApi documentApi = retrofit.create(DocumentApi.class);
-                         documentApi.getAllDocument(cookies, cookie.substring(cookie.indexOf("=") + 1, cookie.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+                        DocumentApi documentApi = retrofit.create(DocumentApi.class);
+                        documentApi.getAllDocument(cookies, cookie.substring(cookie.indexOf("=") + 1, cookie.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
                             @Override
                             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                                 Log.d(LOG_TAG, String.valueOf(response.code()));
@@ -112,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                             public void onFailure(Call<ResponseBody> call, Throwable t) {
                                 Log.d(LOG_TAG, t.getMessage());
                             }
-                         });
+                        });
                     }
 
                     @Override
