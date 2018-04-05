@@ -25,30 +25,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        client = new OkHttpClient();
-//        CookieManager cookieManager = new CookieManager();
-//        CookieHandler.setDefault(cookieManager);
-//        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-//        client.setCookieHandler(cookieManager);
-
-        Request request = new Request.Builder()
-                .url("http://10.0.2.2:8000/accounts/oauth_urls/")
-                .build();
-        client.newCall(request).enqueue(new okhttp3.Callback() {
-            @Override
-            public void onFailure(okhttp3.Call call, IOException e) {
-                Log.d(LOG_TAG, e.getMessage());
-            }
-
-            @Override
-            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-                Log.d(LOG_TAG, response.headers().toString());
-                Log.d(LOG_TAG, response.body().string());
-                HttpUrl url = HttpUrl.parse("http://10.0.2.2:8000/accounts/oauth_urls/");
-                Log.d(LOG_TAG, url.toString());
-                Log.d(LOG_TAG, client.cookieJar().loadForRequest(url).toString());
-            }
-        });
+//        client = new OkHttpClient();
+////        CookieManager cookieManager = new CookieManager();
+////        CookieHandler.setDefault(cookieManager);
+////        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+////        client.setCookieHandler(cookieManager);
+//
+//        Request request = new Request.Builder()
+//                .url("http://10.0.2.2:8000/accounts/oauth_urls/")
+//                .build();
+//        client.newCall(request).enqueue(new okhttp3.Callback() {
+//            @Override
+//            public void onFailure(okhttp3.Call call, IOException e) {
+//                Log.d(LOG_TAG, e.getMessage());
+//            }
+//
+//            @Override
+//            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+//                Log.d(LOG_TAG, response.headers().toString());
+//                Log.d(LOG_TAG, response.body().string());
+//                HttpUrl url = HttpUrl.parse("http://10.0.2.2:8000/accounts/oauth_urls/");
+//                Log.d(LOG_TAG, url.toString());
+//                Log.d(LOG_TAG, client.cookieJar().loadForRequest(url).toString());
+//            }
+//        });
         Button login = (Button) findViewById(R.id.login);
         LoginClickListner clickListner = new LoginClickListner();
         login.setOnClickListener(clickListner);

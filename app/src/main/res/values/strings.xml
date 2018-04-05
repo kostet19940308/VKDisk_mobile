@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">VK DISK</string>
-    <string name="auth_url">http://10.0.2.2:8000/social/login/vk-oauth2/</string>
+    <!--<string name="auth_url">http://10.0.2.2:8000/social/login/vk-oauth2/</string>-->
+    <string name="auth_url">https://vkdisk.faki-mipt.ru/social/login/vk-oauth2/</string>
     <string name="redirect_url">https://oauth.vk.com/blank.html</string>
-    <string name="basic_url">http://10.0.2.2:8000</string>
+    <!--<string name="basic_url">http://10.0.2.2:8000/</string>-->
+    <string name="basic_url">https://vkdisk.faki-mipt.ru/</string>
+    <string name="cookie_store">cookie_store</string>
+    <string name="cookie">cookie_from_login</string>
 </resources>

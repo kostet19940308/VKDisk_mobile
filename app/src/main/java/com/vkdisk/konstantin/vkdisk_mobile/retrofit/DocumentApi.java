@@ -10,7 +10,7 @@ import retrofit2.http.Header;
  */
 
 public interface DocumentApi {
-    @GET("api/v1/documents/?root")
+    @GET("/api/v1/folders/?type=chat")
     Call<ResponseBody> getAllDocument(@Header("Cookie") String cookie, @Header("X-CSRFtoken") String csrf);
     //Call<ResponseBody> getAllDocument();
 }
