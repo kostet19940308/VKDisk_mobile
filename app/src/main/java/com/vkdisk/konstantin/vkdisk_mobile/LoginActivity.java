@@ -40,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     private String session;
     private String store;
     private String cookie_key;
+    private  SharedPreferences pref;
 
     public static Intent createAuthActivityIntent(Context context) {
         Intent intent = new Intent(context, LoginActivity.class);
@@ -49,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        pref = getSharedPreferences(store, MODE_PRIVATE);
         setContentView(R.layout.activity_login);
 
         webView = (WebView) findViewById(R.id.web_view);
@@ -67,6 +69,12 @@ public class LoginActivity extends AppCompatActivity {
         webView.setWebViewClient(new OAuthWebClient());
         webView.setWebChromeClient(new android.webkit.WebChromeClient() {});
         webView.loadUrl(uri.toString());
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        finish();
     }
 
     private class OAuthWebClient extends WebViewClient {
@@ -103,8 +111,8 @@ public class LoginActivity extends AppCompatActivity {
                         csrf = response.headers().toMultimap().get("Set-Cookie").get(1);
                         cookies += "; " + session.substring(0, session.indexOf(";"))  + "; " + csrf.substring(0, csrf.indexOf(";"));
                         Log.d(LOG_TAG, cookies);
-                        SharedPreferences pref = getSharedPreferences(store, MODE_PRIVATE);
                         pref.edit().putString(cookie_key, cookies).apply();
+                        Log.d(LOG_TAG, pref.getString(cookie_key, ""));
                         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
                         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
                         OkHttpClient client = new OkHttpClient.Builder()
@@ -127,6 +135,8 @@ public class LoginActivity extends AppCompatActivity {
                                 Log.d(LOG_TAG, t.getMessage());
                             }
                         });
+                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                        startActivity(intent);
                     }
 
                     @Override
@@ -135,7 +145,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-                //return true;
+                return true;
             }
             view.loadUrl(url);
             return false;
