@@ -12,5 +12,5 @@ import retrofit2.http.Query;
 
 public interface DocumentApi {
     @GET("/api/v1/documents/")
-    Call<ResponseBody> getAllChats(@Query("folder") int folderId, @Header("Cookie") String cookie, @Header("X-CSRFtoken") String csrf);
+    Call<ResponseBody> getAllDocuments(@Query("folder") int folderId, @Header("Cookie") String cookie, @Header("X-CSRFtoken") String csrf);
 }

@@ -5,6 +5,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.vkdisk.konstantin.vkdisk_mobile.R;
+
 /**
  * Created by nagai on 06.04.2018.
  */
@@ -22,5 +24,8 @@ public class ItemDocumentViewHolder extends RecyclerView.ViewHolder{
 
     public ItemDocumentViewHolder(View itemView) {
         super(itemView);
+
+        mTitle = (TextView)itemView.findViewById(R.id.title);
+        mText = (TextView)itemView.findViewById(R.id.text);
     }
 }

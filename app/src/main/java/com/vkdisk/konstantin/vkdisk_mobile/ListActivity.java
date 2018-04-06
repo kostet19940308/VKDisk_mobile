@@ -37,8 +37,8 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-        String cookies = getIntent().getStringExtra("cookie");
-        String csrf = getIntent().getStringExtra("csrf");
+        final String cookies = getIntent().getStringExtra("cookie");
+        final String csrf = getIntent().getStringExtra("csrf");
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -46,17 +46,19 @@ public class ListActivity extends AppCompatActivity {
                 .addNetworkInterceptor(interceptor)
                 .build();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://vkdisk.faki-mipt.ru/")
+                .baseUrl(getString(R.string.basic_url))
                 .client(client)
                 .build();
-        final ChatApi documentApi = retrofit.create(ChatApi.class);
-        documentApi.getAllChats(cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+        final ChatApi chatApi = retrofit.create(ChatApi.class);
+        chatApi.getAllChats(cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d(LOG_TAG, String.valueOf(response.code()));
                 try {
                     Bundle bundle = new Bundle();
                     bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
+                    bundle.putString("cookies", cookies);
+                    bundle.putString("csrf", csrf);
                     FragmentManager fm = getSupportFragmentManager();
                     folderList = new FolderListFragment();
                     folderList.setArguments(bundle);

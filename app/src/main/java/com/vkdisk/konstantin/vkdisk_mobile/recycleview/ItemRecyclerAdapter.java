@@ -17,10 +17,6 @@ import org.json.JSONException;
 import java.lang.ref.WeakReference;
 
 public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHolder> {
-	public static final String[] sItems = {"lorem", "ipsum", "dolor", "sit", "amet", "consectetuer", "adipiscing", "elit",
-			"morbi", "vel", "ligula", "vitae", "arcu", "aliquet", "mollis", "etiam", "vel", "erat", "placerat", "ante",
-			"porttitor", "sodales", "pellentesque", "augue", "purus"};
-
 	public static JSONArray jsonArray = new JSONArray();
     public final String LOG_TAG = this.getClass().getSimpleName();
 

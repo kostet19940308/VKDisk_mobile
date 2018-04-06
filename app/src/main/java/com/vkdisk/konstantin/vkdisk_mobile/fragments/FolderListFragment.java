@@ -2,6 +2,7 @@ package com.vkdisk.konstantin.vkdisk_mobile.fragments;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,12 +12,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.vkdisk.konstantin.vkdisk_mobile.R;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ClickRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ItemRecyclerAdapter;
+import com.vkdisk.konstantin.vkdisk_mobile.retrofit.ChatApi;
+import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 import static android.content.ContentValues.TAG;
 
@@ -34,6 +48,9 @@ public class FolderListFragment extends Fragment implements
     private static final String VISIBLE_POSITION = "position";
     private static final String ID_FOLDER = "idFolder";
 
+    String cookies;
+    String csrf;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +60,8 @@ public class FolderListFragment extends Fragment implements
         }
         try {
             jsonObject = new JSONObject(getArguments().getString("data"));
+            cookies = getArguments().getString("cookies");
+            csrf = getArguments().getString("csrf");
             Log.d(TAG, String.valueOf(jsonObject));
         } catch (JSONException e) {
             try {
@@ -54,7 +73,6 @@ public class FolderListFragment extends Fragment implements
     }
 
     @Override
-
     public void onSaveInstanceState(Bundle outState) {
         currentVisiblePosition = ((LinearLayoutManager)recyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
         Log.d(TAG, Integer.toString(currentVisiblePosition));
@@ -87,6 +105,30 @@ public class FolderListFragment extends Fragment implements
 
     @Override
     public void onItemClick(View view, int position) throws JSONException {
-//        Toast.makeText(this, ItemRecyclerAdapter.jsonArray.getJSONObject(position).getString("title"), Toast.LENGTH_SHORT).show();
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addNetworkInterceptor(interceptor)
+                .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(getActivity().getString(R.string.basic_url))
+                .client(client)
+                .build();
+        final DocumentApi documentApi = retrofit.create(DocumentApi.class);
+        documentApi.getAllDocuments(Integer.parseInt(ItemRecyclerAdapter.jsonArray.getJSONObject(position).getString("id")), cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d(TAG, String.valueOf(response.code()));
+                try {
+                    Log.d(TAG, response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d(TAG, t.getMessage());
+            }
+        });
     }
 }
