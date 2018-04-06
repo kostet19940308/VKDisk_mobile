@@ -10,6 +10,6 @@ import retrofit2.http.Header;
  */
 
 public interface ChatApi {
-    @GET("/api/v1/folders/?type=chat")
+    @GET("/api/v1/folders/?type=chat&large")
     Call<ResponseBody> getAllChats(@Header("Cookie") String cookie, @Header("X-CSRFtoken") String csrf);
 }
