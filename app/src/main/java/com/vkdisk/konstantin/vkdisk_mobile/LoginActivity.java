@@ -14,7 +14,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentApi;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.SessionApi;
 
 import java.net.URI;
@@ -112,30 +111,9 @@ public class LoginActivity extends AppCompatActivity {
                         cookies += "; " + session.substring(0, session.indexOf(";"))  + "; " + csrf.substring(0, csrf.indexOf(";"));
                         Log.d(LOG_TAG, cookies);
                         pref.edit().putString(cookie_key, cookies).apply();
-                        Log.d(LOG_TAG, pref.getString(cookie_key, ""));
-                        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-                        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-                        OkHttpClient client = new OkHttpClient.Builder()
-                                .addInterceptor(interceptor)
-//                                .addNetworkInterceptor(interceptor)
-                                .build();
-                        Retrofit retrofit = new Retrofit.Builder()
-                                .baseUrl(webView.getResources().getString(R.string.basic_url))
-                                .client(client)
-                                .build();
-                        DocumentApi documentApi = retrofit.create(DocumentApi.class);
-                        documentApi.getAllDocument(cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                Log.d(LOG_TAG, String.valueOf(response.code()));
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.d(LOG_TAG, t.getMessage());
-                            }
-                        });
                         Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                        intent.putExtra("cookie", cookies);
+                        intent.putExtra("csrf", csrf);
                         startActivity(intent);
                     }
 

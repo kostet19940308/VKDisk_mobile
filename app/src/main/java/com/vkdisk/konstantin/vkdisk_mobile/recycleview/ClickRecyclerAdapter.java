@@ -4,20 +4,26 @@
  */
 package com.vkdisk.konstantin.vkdisk_mobile.recycleview;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 public class ClickRecyclerAdapter extends ItemRecyclerAdapter implements View.OnClickListener {
 	public interface OnItemClickListener {
-		void onItemClick(View view, int position);
+		void onItemClick(View view, int position) throws JSONException;
 	}
 
 	private final OnItemClickListener mClickListener;
 
-	public ClickRecyclerAdapter(LayoutInflater inflater, OnItemClickListener listener) {
+	public ClickRecyclerAdapter(LayoutInflater inflater, OnItemClickListener listener, JSONArray array) throws JSONException {
 		super(inflater);
+		Log.d(LOG_TAG, String.valueOf(array));
 		mClickListener = listener;
+		jsonArray = array;
 	}
 
 	@Override
@@ -37,6 +43,10 @@ public class ClickRecyclerAdapter extends ItemRecyclerAdapter implements View.On
 	@Override
 	public void onClick(View v) {
 		Integer position = (Integer)v.getTag();
-		mClickListener.onItemClick(v, position);
+		try {
+			mClickListener.onItemClick(v, position);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 }
