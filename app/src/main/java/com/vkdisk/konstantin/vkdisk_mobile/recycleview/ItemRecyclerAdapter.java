@@ -4,6 +4,8 @@
  */
 package com.vkdisk.konstantin.vkdisk_mobile.recycleview;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,12 +39,13 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHolder> {
 		}
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.M)
 	@Override
 	public void onBindViewHolder(ItemViewHolder holder, int position) {
         Log.d(LOG_TAG, String.valueOf(jsonArray));
         try {
             holder.setText(jsonArray.getJSONObject(position).getString("title"));
-			holder.setTitle(jsonArray.getJSONObject(position).getString("title").substring(0,1).toUpperCase());
+			holder.setIcon("folder");
         } catch (JSONException e) {
             e.printStackTrace();
         }

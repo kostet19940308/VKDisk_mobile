@@ -1,5 +1,7 @@
 package com.vkdisk.konstantin.vkdisk_mobile.recycleview;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +14,7 @@ import org.json.JSONException;
  * Created by nagai on 06.04.2018.
  */
 
-public class ClickDocumentRecycleAdapter extends ItemRecyclerAdapter implements View.OnClickListener{
+public class ClickDocumentRecycleAdapter extends ItemDocumentRecycleAdapter implements View.OnClickListener{
 
     public interface OnItemClickListener {
         void onItemClick(View view, int position) throws JSONException;
@@ -35,6 +37,7 @@ public class ClickDocumentRecycleAdapter extends ItemRecyclerAdapter implements 
         return holder;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onBindViewHolder(ItemViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);

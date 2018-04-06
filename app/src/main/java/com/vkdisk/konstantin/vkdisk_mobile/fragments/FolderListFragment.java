@@ -3,6 +3,7 @@ package com.vkdisk.konstantin.vkdisk_mobile.fragments;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,6 +48,10 @@ public class FolderListFragment extends Fragment implements
     int currentVisiblePosition = 0;
     private static final String VISIBLE_POSITION = "position";
     private static final String ID_FOLDER = "idFolder";
+    DocumentLisFragment documentLisFragment = new DocumentLisFragment();
+    FragmentTransaction fragmentTransaction;
+
+
 
     String cookies;
     String csrf;
@@ -120,8 +125,20 @@ public class FolderListFragment extends Fragment implements
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d(TAG, String.valueOf(response.code()));
                 try {
-                    Log.d(TAG, response.body().string());
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    Log.d(TAG, String.valueOf(jsonObject));
+                    Bundle bundle = new Bundle();
+                    bundle.putString("data", String.valueOf(jsonObject));
+                    bundle.putString("cookies", cookies);
+                    bundle.putString("csrf", csrf);
+                    documentLisFragment.setArguments(bundle);
+                    fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.fragment, documentLisFragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
