@@ -11,9 +11,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.NavigationView;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.vkdisk.konstantin.vkdisk_mobile.fragments.DocumentLisFragment;
@@ -23,11 +25,13 @@ import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ClickRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ItemRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.ChatApi;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentRootApi;
+import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentRootFilterApi;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -62,7 +66,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        loadAllDocuments();
+        loadFilterDocuments("");
     }
 
     @Override
@@ -72,14 +76,41 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.all_items) {
-            loadAllDocuments();
+            loadFilterDocuments("");
         } else if (id == R.id.dialogs) {
-            loadChats();
+            loadChats("");
         }
         return true;
     }
 
-    private void loadChats() {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_mail, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d(LOG_TAG, query);
+                if(Objects.equals(folderList.getTag(), getString(R.string.document_list))) {
+                    loadFilterDocuments(query);
+                } else if (Objects.equals(folderList.getTag(), getString(R.string.chat_list))) {
+                    loadChats(query);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d(LOG_TAG, newText);
+                return true;
+            }
+        });
+
+        return true;
+    }
+
+    private void loadChats(String filter) {
         final String cookies = pref.getString(getString(R.string.cookie), "");
         final String csrf = pref.getString(getString(R.string.csrf), "");
 
@@ -93,7 +124,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 .client(client)
                 .build();
         final ChatApi chatApi = retrofit.create(ChatApi.class);
-        chatApi.getAllChats(cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+        chatApi.getAllChats(filter, cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d(LOG_TAG, String.valueOf(response.code()));
@@ -101,9 +132,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     Bundle bundle = new Bundle();
                     bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
                     FragmentManager fm = getSupportFragmentManager();
+                    fm.popBackStack();
                     folderList = new FolderListFragment();
                     folderList.setArguments(bundle);
-                    fm.beginTransaction().replace(R.id.fragment, folderList, "fragmentList").commit();
+                    fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.chat_list)).commit();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
@@ -117,7 +149,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void loadAllDocuments() {
+    private void loadFilterDocuments(String filter) {
         final String cookies = pref.getString(getString(R.string.cookie), "");
         final String csrf = pref.getString(getString(R.string.csrf), "");
 
@@ -130,8 +162,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 .baseUrl(getString(R.string.basic_url))
                 .client(client)
                 .build();
-        final DocumentRootApi documentRootApi = retrofit.create(DocumentRootApi.class);
-        documentRootApi.getAllDocuments(cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+        final DocumentRootFilterApi documentRootFilterApi = retrofit.create(DocumentRootFilterApi.class);
+        documentRootFilterApi.getAllFilterDocuments(filter, cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d(LOG_TAG, String.valueOf(response.code()));
@@ -139,9 +171,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     Bundle bundle = new Bundle();
                     bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
                     FragmentManager fm = getSupportFragmentManager();
+                    fm.popBackStack();
                     folderList = new DocumentLisFragment();
                     folderList.setArguments(bundle);
-                    fm.beginTransaction().replace(R.id.fragment, folderList, "fragmentList").commit();
+                    fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.document_list)).commit();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
