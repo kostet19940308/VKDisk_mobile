@@ -1,6 +1,8 @@
 package com.vkdisk.konstantin.vkdisk_mobile;
 
 import android.app.FragmentTransaction;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -37,8 +39,9 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-        final String cookies = getIntent().getStringExtra("cookie");
-        final String csrf = getIntent().getStringExtra("csrf");
+        SharedPreferences pref =  PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        final String cookies = pref.getString(getString(R.string.cookie), "");
+        final String csrf = pref.getString(getString(R.string.csrf), "");
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -57,8 +60,8 @@ public class ListActivity extends AppCompatActivity {
                 try {
                     Bundle bundle = new Bundle();
                     bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
-                    bundle.putString("cookies", cookies);
-                    bundle.putString("csrf", csrf);
+//                    bundle.putString("cookies", cookies);
+//                    bundle.putString("csrf", csrf);
                     FragmentManager fm = getSupportFragmentManager();
                     folderList = new FolderListFragment();
                     folderList.setArguments(bundle);

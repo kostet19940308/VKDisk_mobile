@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,8 +38,8 @@ public class LoginActivity extends AppCompatActivity {
     private String redirectUrl;
     private String csrf;
     private String session;
-    private String store;
     private String cookie_key;
+    private String csrf_key;
     private  SharedPreferences pref;
 
     public static Intent createAuthActivityIntent(Context context) {
@@ -49,15 +50,15 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        pref = getSharedPreferences(store, MODE_PRIVATE);
+        pref =  PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setContentView(R.layout.activity_login);
 
         webView = (WebView) findViewById(R.id.web_view);
         webView.getSettings().setJavaScriptEnabled(true);
         loginUrl = getString(R.string.auth_url);
         redirectUrl = getString(R.string.redirect_url);
-        store = getString(R.string.cookie_store);
         cookie_key = getString(R.string.cookie);
+        csrf_key = getString(R.string.csrf);
     }
 
     @Override
@@ -111,9 +112,8 @@ public class LoginActivity extends AppCompatActivity {
                         cookies += "; " + session.substring(0, session.indexOf(";"))  + "; " + csrf.substring(0, csrf.indexOf(";"));
                         Log.d(LOG_TAG, cookies);
                         pref.edit().putString(cookie_key, cookies).apply();
+                        pref.edit().putString(csrf_key, csrf).apply();
                         Intent intent = new Intent(LoginActivity.this, ListActivity.class);
-                        intent.putExtra("cookie", cookies);
-                        intent.putExtra("csrf", csrf);
                         startActivity(intent);
                     }
 

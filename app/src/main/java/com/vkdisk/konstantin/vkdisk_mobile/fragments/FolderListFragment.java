@@ -1,5 +1,7 @@
 package com.vkdisk.konstantin.vkdisk_mobile.fragments;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -65,8 +67,9 @@ public class FolderListFragment extends Fragment implements
         }
         try {
             jsonObject = new JSONObject(getArguments().getString("data"));
-            cookies = getArguments().getString("cookies");
-            csrf = getArguments().getString("csrf");
+            SharedPreferences pref =  PreferenceManager.getDefaultSharedPreferences(this.getContext());
+            cookies = pref.getString(getString(R.string.cookie), "");
+            csrf = pref.getString(getString(R.string.csrf), "");
             Log.d(TAG, String.valueOf(jsonObject));
         } catch (JSONException e) {
             try {
@@ -129,8 +132,6 @@ public class FolderListFragment extends Fragment implements
                     Log.d(TAG, String.valueOf(jsonObject));
                     Bundle bundle = new Bundle();
                     bundle.putString("data", String.valueOf(jsonObject));
-                    bundle.putString("cookies", cookies);
-                    bundle.putString("csrf", csrf);
                     documentLisFragment.setArguments(bundle);
                     fragmentTransaction = getFragmentManager().beginTransaction();
                     fragmentTransaction.replace(R.id.fragment, documentLisFragment);
