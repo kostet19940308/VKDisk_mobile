@@ -13,4 +13,5 @@ import retrofit2.http.Query;
 public interface DocumentRootFilterApi {
     @GET("/api/v1/documents/?root&filter")
     Call<ResponseBody> getAllFilterDocuments(@Query("name") String filter, @Header("Cookie") String cookie, @Header("X-CSRFtoken") String csrf);
+    // Тут надо будет добавить query параметр сортировки и (возможно) паггинации
 }

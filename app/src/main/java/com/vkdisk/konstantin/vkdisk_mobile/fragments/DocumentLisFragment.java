@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.vkdisk.konstantin.vkdisk_mobile.R;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ClickDocumentRecycleAdapter;
@@ -23,7 +24,7 @@ import org.json.JSONObject;
 
 import static android.content.ContentValues.TAG;
 
-public class DocumentLisFragment extends Fragment implements ClickDocumentRecycleAdapter.OnItemClickListener{
+public class DocumentLisFragment extends Fragment implements ClickDocumentRecycleAdapter.OnItemClickListener, ClickDocumentRecycleAdapter.OnItemLongClickListener{
 
     private RecyclerView recyclerView;
     private ClickDocumentRecycleAdapter recyclerAdapter;
@@ -47,6 +48,7 @@ public class DocumentLisFragment extends Fragment implements ClickDocumentRecycl
             currentVisiblePosition = savedInstanceState.getInt(VISIBLE_POSITION);
         }
         try {
+            // Эту хрень надо из базы данных выгружать
             jsonObject = new JSONObject(getArguments().getString("data"));
             SharedPreferences pref =  PreferenceManager.getDefaultSharedPreferences(this.getContext());
             cookies = pref.getString(getString(R.string.cookie), "");
@@ -73,7 +75,7 @@ public class DocumentLisFragment extends Fragment implements ClickDocumentRecycl
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         recyclerView = new RecyclerView(getActivity());
         try {
-            recyclerAdapter = new ClickDocumentRecycleAdapter(getActivity().getLayoutInflater(), this, jsonObject.getJSONArray("results"));
+            recyclerAdapter = new ClickDocumentRecycleAdapter(getActivity().getLayoutInflater(), this, this, jsonObject.getJSONArray("results"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -94,6 +96,16 @@ public class DocumentLisFragment extends Fragment implements ClickDocumentRecycl
 
     @Override
     public void onItemClick(View view, int position) throws JSONException {
+
+    }
+
+    @Override
+    public void onItemLongClick(View view, int position) throws JSONException {
+        Toast.makeText(this.getContext(),
+                jsonObject.getJSONArray("results").getJSONObject(position).getString("title"),
+        Toast.LENGTH_SHORT).show();
+
+        // тут надо создать массив выделенных элементов, куда передаем то, что выделяем.
 
     }
 }

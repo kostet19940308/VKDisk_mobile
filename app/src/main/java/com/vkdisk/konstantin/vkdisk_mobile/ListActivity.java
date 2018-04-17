@@ -80,7 +80,20 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.dialogs) {
             loadChats("");
         }
+        // тут надо получать id папки если у нас список файлов в чате. и вызывать фрагмент списка документов с folder_id=id
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+        // Тут надо добавить кнопку, чтобы если мы находимся на фрагменте со списком файлов в чате (а в перспективе еще и списком папок в папках),
+        // то место hamburger menu надо чтобы появлялась стрелка
     }
 
     @Override
@@ -106,11 +119,14 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 return true;
             }
         });
-
+        // Тут надо добавить если выделяется хотя бы один файл, появляется возможность удалить их,
+        // Переименовать, если выделен только один файл, в перспективе переместить в папку
+        // Изменящиеся хрени в toolbar надо сунуть в menu_main
         return true;
     }
 
     private void loadChats(String filter) {
+        // Эту всю херню надо убрать. Это просто говноглушка
         final String cookies = pref.getString(getString(R.string.cookie), "");
         final String csrf = pref.getString(getString(R.string.csrf), "");
 
