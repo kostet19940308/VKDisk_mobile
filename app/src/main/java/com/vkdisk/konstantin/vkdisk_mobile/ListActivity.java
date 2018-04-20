@@ -1,6 +1,7 @@
 package com.vkdisk.konstantin.vkdisk_mobile;
 
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -79,6 +80,11 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             loadFilterDocuments("");
         } else if (id == R.id.dialogs) {
             loadChats("");
+        } else if (id == R.id.exit) {
+            pref.edit().clear().apply();
+            Intent intent =  new Intent(this, SplashActivity.class);
+            startActivity(intent);
+            finish();
         }
         // тут надо получать id папки если у нас список файлов в чате. и вызывать фрагмент списка документов с folder_id=id
         return true;
