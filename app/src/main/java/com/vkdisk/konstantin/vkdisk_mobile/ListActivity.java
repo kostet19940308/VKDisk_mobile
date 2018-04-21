@@ -65,6 +65,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     MenuItem sortDateItem;
     MenuItem sortNameArrowItem;
     MenuItem sortDateArrowItem;
+    String sort;
+    String filter;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,8 +84,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        sort = "created";
+        filter = "";
 
-        loadFilterDocuments("");
+        loadFilterDocuments();
     }
 
     @Override
@@ -93,7 +97,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.all_items) {
-            loadFilterDocuments("");
+            loadFilterDocuments();
         } else if (id == R.id.dialogs) {
             loadChats("");
         } else if (id == R.id.exit) {
@@ -140,6 +144,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 if (isNameSort) {
                     isNameSort = false;
                     setSort();
+                    sort = "title";
+                    loadFilterDocuments();
                     isDateReverse = false;
                     sortDateArrowItem.setIcon(R.drawable.sort_direct);
                 } else {
@@ -161,6 +167,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 if (!isNameSort) {
                     isNameSort = true;
                     setSort();
+                    sort = "created";
+                    loadFilterDocuments();
                     isNameReverse = false;
                     sortNameArrowItem.setIcon(R.drawable.sort_direct);
                 } else {
@@ -194,7 +202,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextSubmit(String query) {
                 Log.d(LOG_TAG, query);
                 if(Objects.equals(folderList.getTag(), getString(R.string.document_list))) {
-                    loadFilterDocuments(query);
+                    filter = query;
+                    loadFilterDocuments();
                 } else if (Objects.equals(folderList.getTag(), getString(R.string.chat_list))) {
                     loadChats(query);
                 }
@@ -273,7 +282,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void loadFilterDocuments(String filter) {
+    private void loadFilterDocuments() {
         final String cookies = pref.getString(getString(R.string.cookie), "");
         final String csrf = pref.getString(getString(R.string.csrf), "");
 
@@ -287,7 +296,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 .client(client)
                 .build();
         final DocumentRootFilterApi documentRootFilterApi = retrofit.create(DocumentRootFilterApi.class);
-        documentRootFilterApi.getAllFilterDocuments(filter, cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+        documentRootFilterApi.getAllFilterDocuments(filter, sort, cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d(LOG_TAG, String.valueOf(response.code()));
