@@ -106,6 +106,6 @@ public class DocumentLisFragment extends Fragment implements ClickDocumentRecycl
         Toast.LENGTH_SHORT).show();
 
         // тут надо создать массив выделенных элементов, куда передаем то, что выделяем.
-
+        // и куда-то передавать, чтобы мы получили как-то это количесто из ListActivity
     }
 }

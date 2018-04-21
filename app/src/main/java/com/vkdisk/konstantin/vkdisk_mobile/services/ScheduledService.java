@@ -13,6 +13,7 @@ import static android.os.Looper.getMainLooper;
  */
 
 public class ScheduledService extends IntentService {
+    // Это просто копипаста. Я хз что с этим делать))
     private static final String EXTRA_MESSAGE = "extra_message";
     private static final String ACTION = "scheduled_action";
     private static final int NOTIFY_ID = 101;

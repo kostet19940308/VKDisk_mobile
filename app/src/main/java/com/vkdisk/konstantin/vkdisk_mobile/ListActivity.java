@@ -86,7 +86,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         sort = "created";
         filter = "";
-
+        // Эту загрузку надо вынести в scheduler
         loadFilterDocuments();
     }
 
@@ -97,8 +97,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.all_items) {
+            //в scheduler
             loadFilterDocuments();
         } else if (id == R.id.dialogs) {
+            // в scheduler
             loadChats("");
         } else if (id == R.id.exit) {
             pref.edit().clear().apply();
@@ -106,7 +108,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             finish();
         }
-        // тут надо получать id папки если у нас список файлов в чате. и вызывать фрагмент списка документов с folder_id=id
         return true;
     }
 
@@ -118,11 +119,15 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         } else {
             super.onBackPressed();
         }
-        // Тут надо добавить кнопку, чтобы если мы находимся на фрагменте со списком файлов в чате (а в перспективе еще и списком папок в папках),
+        // Тут надо где-то добавить кнопку,
+        // чтобы если мы находимся на фрагменте со списком файлов в чате
+        // (а в перспективе еще и списком папок в папках),
         // то место hamburger menu надо чтобы появлялась стрелка
     }
 
     public void setSort() {
+        // Это сортировка. Возможно это можно как-то более-грамотно сделать..
+        // Например, перенести в scheduler. Хотя ей и тут не так плохо
         TextView titleName = new TextView(this.getApplicationContext());
         TextView titleDate = new TextView(this.getApplicationContext());
         if (!isNameSort) {
@@ -145,7 +150,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     isNameSort = false;
                     setSort();
                     sort = "title";
-                    loadFilterDocuments();
                     isDateReverse = false;
                     sortDateArrowItem.setIcon(R.drawable.sort_direct);
                 } else {
@@ -156,6 +160,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     }
                     isNameReverse = !isNameReverse;
                 }
+                // в scheduler
+                loadFilterDocuments();
             }
         });
         sortDateItem.setActionView(titleName);
@@ -168,7 +174,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     isNameSort = true;
                     setSort();
                     sort = "created";
-                    loadFilterDocuments();
                     isNameReverse = false;
                     sortNameArrowItem.setIcon(R.drawable.sort_direct);
                 } else {
@@ -179,6 +184,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     }
                     isDateReverse = !isDateReverse;
                 }
+                // в scheduler
+                loadFilterDocuments();
             }
         });
         sortNameItem.setActionView(titleDate);
@@ -203,6 +210,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 Log.d(LOG_TAG, query);
                 if(Objects.equals(folderList.getTag(), getString(R.string.document_list))) {
                     filter = query;
+                    // в scheduler
                     loadFilterDocuments();
                 } else if (Objects.equals(folderList.getTag(), getString(R.string.chat_list))) {
                     loadChats(query);
@@ -263,8 +271,11 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 Log.d(LOG_TAG, String.valueOf(response.code()));
                 try {
                     Bundle bundle = new Bundle();
+                    // JSONObject надо пихать в базу данных и выгружать из нее во фрагменте
                     bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
                     FragmentManager fm = getSupportFragmentManager();
+                    // На самом деле я хз, на сколько это правильно так делать.
+                    // Но так фрагменты не накладываются друг на драга)
                     fm.popBackStack();
                     folderList = new FolderListFragment();
                     folderList.setArguments(bundle);
@@ -296,7 +307,13 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 .client(client)
                 .build();
         final DocumentRootFilterApi documentRootFilterApi = retrofit.create(DocumentRootFilterApi.class);
-        documentRootFilterApi.getAllFilterDocuments(filter, sort, cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+        documentRootFilterApi.getAllFilterDocuments(
+                filter,
+                sort,
+                (isDateReverse || isNameReverse ? "reverse" : null),
+                cookies,
+                csrf.substring(csrf.indexOf("=") + 1,
+                        csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d(LOG_TAG, String.valueOf(response.code()));
@@ -304,6 +321,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     Bundle bundle = new Bundle();
                     bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
                     FragmentManager fm = getSupportFragmentManager();
+                    // На самом деле я хз, на сколько это правильно так делать.
+                    // Но так фрагменты не накладываются друг на драга)
                     fm.popBackStack();
                     folderList = new DocumentLisFragment();
                     folderList.setArguments(bundle);

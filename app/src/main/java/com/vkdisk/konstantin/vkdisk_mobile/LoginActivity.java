@@ -49,6 +49,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Тут вообще по-хорошему надо чтобы при выходе из приложения, мы переходили после "Зайти через вк" в webView
         super.onCreate(savedInstanceState);
         pref =  PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setContentView(R.layout.activity_login);

@@ -66,6 +66,7 @@ public class FolderListFragment extends Fragment implements
             currentVisiblePosition = savedInstanceState.getInt(VISIBLE_POSITION);
         }
         try {
+            // Надо выгружать из БД
             jsonObject = new JSONObject(getArguments().getString("data"));
             SharedPreferences pref =  PreferenceManager.getDefaultSharedPreferences(this.getContext());
             cookies = pref.getString(getString(R.string.cookie), "");
@@ -113,6 +114,7 @@ public class FolderListFragment extends Fragment implements
 
     @Override
     public void onItemClick(View view, int position) throws JSONException {
+        // Тоже в scheduler
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient client = new OkHttpClient.Builder()

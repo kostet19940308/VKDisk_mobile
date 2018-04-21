@@ -4,6 +4,8 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Part;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -12,6 +14,9 @@ import retrofit2.http.Query;
 
 public interface DocumentRootFilterApi {
     @GET("/api/v1/documents/?root&filter")
-    Call<ResponseBody> getAllFilterDocuments(@Query("name") String filter, @Query("sort") String sort, @Header("Cookie") String cookie, @Header("X-CSRFtoken") String csrf);
-    // Тут надо будет добавить query параметр сортировки и (возможно) паггинации
+    Call<ResponseBody> getAllFilterDocuments(@Query("name") String filter,
+                                             @Query("sort") String sort,
+                                             @Query("reverse") String reverse,
+                                             @Header("Cookie") String cookie,
+                                             @Header("X-CSRFtoken") String csrf);
 }
