@@ -8,4 +8,29 @@
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:title="Search"/>
+    <item
+        android:id="@+id/action_sort_name"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:title="name"/>
+    <item
+        android:id="@+id/action_sort_name_arrow"
+        app:showAsAction="always"
+        android:icon="@drawable/sort_direct"
+        android:title="name"/>
+    <item
+        android:id="@+id/action_sort_date"
+        app:showAsAction="always"
+        android:title="date"/>
+    <item
+        android:id="@+id/action_sort_date_arrow"
+        app:showAsAction="always"
+        android:icon="@drawable/sort_direct"
+        android:title="name"/>
+    <item
+        android:id="@+id/action_sort"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/sort"
+        android:title="Sort"/>
 </menu>

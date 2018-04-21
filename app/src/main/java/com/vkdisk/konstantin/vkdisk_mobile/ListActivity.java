@@ -49,6 +49,13 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     Toolbar toolbar;
     private NavigationView navigationView;
     SharedPreferences pref;
+    private boolean isSort = false;
+    MenuItem sortItem;
+    MenuItem searchItem;
+    MenuItem sortNameItem;
+    MenuItem sortDateItem;
+    MenuItem sortNameArrowItem;
+    MenuItem sortDateArrowItem;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,8 +112,14 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_mail, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) menuItem.getActionView();
+        searchItem = menu.findItem(R.id.action_search);
+        sortItem = menu.findItem(R.id.action_sort);
+        sortNameItem = menu.findItem(R.id.action_sort_name);
+        sortDateItem = menu.findItem(R.id.action_sort_date);
+        sortDateArrowItem = menu.findItem(R.id.action_sort_date_arrow);
+        sortNameArrowItem = menu.findItem(R.id.action_sort_name_arrow);
+
+        final SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -125,11 +138,32 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 return true;
             }
         });
+
+        sortNameItem.setVisible(false);
+        sortDateItem.setVisible(false);
+        sortDateArrowItem.setVisible(false);
+        sortNameArrowItem.setVisible(false);
         // Тут надо добавить если выделяется хотя бы один файл, появляется возможность удалить их,
         // Переименовать, если выделен только один файл, в перспективе переместить в папку
         // Изменящиеся хрени в toolbar надо сунуть в menu_main
         return true;
     }
+
+    @Override
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.equals(sortItem)) {
+            searchItem.setVisible(isSort);
+            sortNameItem.setVisible(!isSort);
+            sortDateItem.setVisible(!isSort);
+            sortNameArrowItem.setVisible(!isSort);
+            sortDateArrowItem.setVisible(!isSort);
+            getSupportActionBar().setDisplayShowTitleEnabled(isSort);
+            isSort = !isSort;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     private void loadChats(String filter) {
         // Эту всю херню надо убрать. Это просто говноглушка
