@@ -17,20 +17,20 @@
         android:id="@+id/action_sort_name_arrow"
         app:showAsAction="always"
         android:icon="@drawable/sort_direct"
-        android:title="name"/>
+        android:title="@string/date"/>
     <item
         android:id="@+id/action_sort_date"
         app:showAsAction="always"
-        android:title="date"/>
+        android:title="@string/date"/>
     <item
         android:id="@+id/action_sort_date_arrow"
         app:showAsAction="always"
         android:icon="@drawable/sort_direct"
-        android:title="name"/>
+        android:title="@string/name"/>
     <item
         android:id="@+id/action_sort"
         android:orderInCategory="100"
         app:showAsAction="always"
         android:icon="@drawable/sort"
-        android:title="Sort"/>
+        android:title="@string/name"/>
 </menu>

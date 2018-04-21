@@ -19,4 +19,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="document_list">Document List</string>
     <string name="chat_list">Chat List</string>
+
+    <string name="name">NAME</string>
+    <string name="date">DATE</string>
 </resources>

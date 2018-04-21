@@ -3,6 +3,8 @@ package com.vkdisk.konstantin.vkdisk_mobile;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -15,9 +17,13 @@ import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.NavigationView;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.vkdisk.konstantin.vkdisk_mobile.fragments.DocumentLisFragment;
 import com.vkdisk.konstantin.vkdisk_mobile.fragments.FolderListFragment;
@@ -50,6 +56,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     SharedPreferences pref;
     private boolean isSort = false;
+    private boolean isNameSort = true;
+    private boolean isNameReverse = false;
+    private boolean isDateReverse = false;
     MenuItem sortItem;
     MenuItem searchItem;
     MenuItem sortNameItem;
@@ -109,6 +118,64 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         // то место hamburger menu надо чтобы появлялась стрелка
     }
 
+    public void setSort() {
+        TextView titleName = new TextView(this.getApplicationContext());
+        TextView titleDate = new TextView(this.getApplicationContext());
+        if (!isNameSort) {
+            SpannableString contentName = new SpannableString(getString(R.string.name));
+            contentName.setSpan(new UnderlineSpan(), 0, contentName.length(), 0);
+            titleName.setText(contentName);
+            titleDate.setText(getString(R.string.date));
+        } else {
+            SpannableString contentName = new SpannableString(getString(R.string.date));
+            contentName.setSpan(new UnderlineSpan(), 0, contentName.length(), 0);
+            titleDate.setText(contentName);
+            titleName.setText(getString(R.string.name));
+        }
+        titleName.setTextColor(Color.WHITE);
+        titleName.setTypeface(null, Typeface.BOLD);
+        titleName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isNameSort) {
+                    isNameSort = false;
+                    setSort();
+                    isDateReverse = false;
+                    sortDateArrowItem.setIcon(R.drawable.sort_direct);
+                } else {
+                    if (isNameReverse) {
+                        sortNameArrowItem.setIcon(R.drawable.sort_direct);
+                    } else {
+                        sortNameArrowItem.setIcon(R.drawable.sort_reverse);
+                    }
+                    isNameReverse = !isNameReverse;
+                }
+            }
+        });
+        sortDateItem.setActionView(titleName);
+        titleDate.setTextColor(Color.WHITE);
+        titleDate.setTypeface(null, Typeface.BOLD);
+        titleDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isNameSort) {
+                    isNameSort = true;
+                    setSort();
+                    isNameReverse = false;
+                    sortNameArrowItem.setIcon(R.drawable.sort_direct);
+                } else {
+                    if (isDateReverse) {
+                        sortDateArrowItem.setIcon(R.drawable.sort_direct);
+                    } else {
+                        sortDateArrowItem.setIcon(R.drawable.sort_reverse);
+                    }
+                    isDateReverse = !isDateReverse;
+                }
+            }
+        });
+        sortNameItem.setActionView(titleDate);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_mail, menu);
@@ -118,6 +185,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortDateItem = menu.findItem(R.id.action_sort_date);
         sortDateArrowItem = menu.findItem(R.id.action_sort_date_arrow);
         sortNameArrowItem = menu.findItem(R.id.action_sort_name_arrow);
+
+        setSort();
 
         final SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -150,7 +219,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.equals(sortItem)) {
             searchItem.setVisible(isSort);
