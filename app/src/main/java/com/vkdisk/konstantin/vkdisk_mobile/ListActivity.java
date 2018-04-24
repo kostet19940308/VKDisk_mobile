@@ -101,7 +101,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             loadFilterDocuments();
         } else if (id == R.id.dialogs) {
             // в scheduler
-            loadChats("");
+            loadChats();
         } else if (id == R.id.exit) {
             pref.edit().clear().apply();
             Intent intent =  new Intent(this, SplashActivity.class);
@@ -161,7 +161,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     isNameReverse = !isNameReverse;
                 }
                 // в scheduler
-                loadFilterDocuments();
+                loadData();
             }
         });
         sortDateItem.setActionView(titleName);
@@ -185,7 +185,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     isDateReverse = !isDateReverse;
                 }
                 // в scheduler
-                loadFilterDocuments();
+                loadData();
             }
         });
         sortNameItem.setActionView(titleDate);
@@ -208,13 +208,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d(LOG_TAG, query);
-                if(Objects.equals(folderList.getTag(), getString(R.string.document_list))) {
-                    filter = query;
-                    // в scheduler
-                    loadFilterDocuments();
-                } else if (Objects.equals(folderList.getTag(), getString(R.string.chat_list))) {
-                    loadChats(query);
-                }
+                filter = query;
+                loadData();
                 return false;
             }
 
@@ -249,8 +244,16 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
+    private void loadData() {
+        if(Objects.equals(folderList.getTag(), getString(R.string.document_list))) {
+            // в scheduler
+            loadFilterDocuments();
+        } else if (Objects.equals(folderList.getTag(), getString(R.string.chat_list))) {
+            loadChats();
+        }
+    }
 
-    private void loadChats(String filter) {
+    private void loadChats() {
         // Эту всю херню надо убрать. Это просто говноглушка
         final String cookies = pref.getString(getString(R.string.cookie), "");
         final String csrf = pref.getString(getString(R.string.csrf), "");
@@ -265,7 +268,13 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 .client(client)
                 .build();
         final ChatApi chatApi = retrofit.create(ChatApi.class);
-        chatApi.getAllChats(filter, cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+        chatApi.getAllChats(
+                filter,
+                sort,
+                (isDateReverse || isNameReverse ? "reverse" : null),
+                cookies,
+                csrf.substring(csrf.indexOf("=") + 1,
+                        csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d(LOG_TAG, String.valueOf(response.code()));
