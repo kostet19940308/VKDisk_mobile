@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -55,7 +56,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     Toolbar toolbar;
     private NavigationView navigationView;
     SharedPreferences pref;
-    private boolean isSort = false;
+    DrawerLayout drawer;
+    ActionBarDrawerToggle toggle;
     private boolean isNameSort = true;
     private boolean isNameReverse = false;
     private boolean isDateReverse = false;
@@ -76,8 +78,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
@@ -233,15 +236,30 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.equals(sortItem)) {
-            searchItem.setVisible(isSort);
-            sortNameItem.setVisible(!isSort);
-            sortDateItem.setVisible(!isSort);
-            sortNameArrowItem.setVisible(!isSort);
-            sortDateArrowItem.setVisible(!isSort);
-            getSupportActionBar().setDisplayShowTitleEnabled(isSort);
-            isSort = !isSort;
+            setSortToolbar(true);
+            toggle.setDrawerIndicatorEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setSortToolbar(false);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    toggle.setDrawerIndicatorEnabled(true);
+                }
+            });
+        } else if (toggle.onOptionsItemSelected(item)) {
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setSortToolbar(boolean isSort) {
+        searchItem.setVisible(!isSort);
+        sortNameItem.setVisible(isSort);
+        sortDateItem.setVisible(isSort);
+        sortNameArrowItem.setVisible(isSort);
+        sortDateArrowItem.setVisible(isSort);
+        getSupportActionBar().setDisplayShowTitleEnabled(!isSort);
     }
 
     private void loadData() {
