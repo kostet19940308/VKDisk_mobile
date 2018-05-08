@@ -12,9 +12,7 @@ import retrofit2.http.Query;
 
 public interface ChatApi {
     @GET("/api/v1/folders/?type=chat&large&filter")
-    Call<ResponseBody> getAllChats(@Query("name") String filter,
+    Call<String> getAllChats(@Query("name") String filter,
                                    @Query("sort") String sort,
-                                   @Query("reverse") String reverse,
-                                   @Header("Cookie") String cookie,
-                                   @Header("X-CSRFtoken") String csrf);
+                                   @Query("reverse") String reverse);
 }

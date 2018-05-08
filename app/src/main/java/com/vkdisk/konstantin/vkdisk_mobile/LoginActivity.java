@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.SessionApi;
 
 import java.net.URI;
@@ -27,9 +29,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements Storage.DataSubscriber {
 
     public final String LOG_TAG = this.getClass().getSimpleName();
+    private final static int LOGIN_CODE = 1;
 
 
     private WebView webView;
@@ -40,7 +43,9 @@ public class LoginActivity extends AppCompatActivity {
     private String session;
     private String cookie_key;
     private String csrf_key;
-    private  SharedPreferences pref;
+    private SharedPreferences pref;
+
+    private Storage mStorage;
 
     public static Intent createAuthActivityIntent(Context context) {
         Intent intent = new Intent(context, LoginActivity.class);
@@ -51,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // Тут вообще по-хорошему надо чтобы при выходе из приложения, мы переходили после "Зайти через вк" в webView
         super.onCreate(savedInstanceState);
-        pref =  PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setContentView(R.layout.activity_login);
 
         webView = (WebView) findViewById(R.id.web_view);
@@ -60,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
         redirectUrl = getString(R.string.redirect_url);
         cookie_key = getString(R.string.cookie);
         csrf_key = getString(R.string.csrf);
+        mStorage = Storage.getOrCreateInstance(getApplicationContext());
     }
 
     @Override
@@ -67,62 +73,44 @@ public class LoginActivity extends AppCompatActivity {
         super.onResume();
         URI uri = URI.create(loginUrl);
         CookieManager.getInstance().setAcceptCookie(true);
-        webView.setWebViewClient(new OAuthWebClient());
-        webView.setWebChromeClient(new android.webkit.WebChromeClient() {});
+        webView.setWebViewClient(new OAuthWebClient(this));
+        webView.setWebChromeClient(new android.webkit.WebChromeClient() {
+        });
         webView.loadUrl(uri.toString());
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
+        mStorage.unsubscribe(this);
         super.onStop();
         finish();
     }
 
     private class OAuthWebClient extends WebViewClient {
 
+        private Storage.DataSubscriber subscriber;
+
+        public OAuthWebClient(Storage.DataSubscriber newSubscriber) {
+            subscriber = newSubscriber;
+        }
+
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
         }
 
-        public boolean shouldOverrideUrlLoading(WebView view, String url){
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
-            if(url.startsWith(redirectUrl)){
+            if (url.startsWith(redirectUrl)) {
                 url.indexOf("#");
-                String substring = url.substring(url.indexOf("#")+1, url.length());
+                String substring = url.substring(url.indexOf("#") + 1, url.length());
                 String[] urls = substring.split("&");
                 final String code = urls[0].split("=")[1];
                 final String state = urls[1].split("=")[1];
-                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-                interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-                OkHttpClient client = new OkHttpClient.Builder()
-//                        .addInterceptor(interceptor)
-                        .addNetworkInterceptor(interceptor)
-                        .followRedirects(false)
-                        .build();
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(webView.getResources().getString(R.string.basic_url))
-                        .client(client)
-                        .build();
-                SessionApi getSession = retrofit.create(SessionApi.class);
-                getSession.getSession(code, state, cookies).enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        session = response.headers().toMultimap().get("Set-Cookie").get(0);
-                        csrf = response.headers().toMultimap().get("Set-Cookie").get(1);
-                        cookies += "; " + session.substring(0, session.indexOf(";"))  + "; " + csrf.substring(0, csrf.indexOf(";"));
-                        Log.d(LOG_TAG, cookies);
-                        pref.edit().putString(cookie_key, cookies).apply();
-                        pref.edit().putString(csrf_key, csrf).apply();
-                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
-                        startActivity(intent);
-                    }
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Log.d(LOG_TAG, t.getMessage());
-                    }
-                });
+                SessionApi getSession = mStorage.getRetrofit().create(SessionApi.class);
+                ApiHandlerTask<ResponseBody> apiHandlerTask = new ApiHandlerTask<>(getSession.getSession(code, state), LOGIN_CODE);
+                mStorage.addApiHandlerTask(apiHandlerTask, subscriber);
 
                 return true;
             }
@@ -131,12 +119,14 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onPageFinished(WebView view, String url){
+        public void onPageFinished(WebView view, String url) {
             cookies = CookieManager.getInstance().getCookie(loginUrl);
+
+            mStorage.addCookiesFromString(URI.create(loginUrl), cookies);
             Log.d(LOG_TAG, "All the cookies in a string:" + cookies);
         }
 
-        public void onReceivedError(WebView view, int errorCode, String description, String  failingUrl) {
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             Toast.makeText(getApplicationContext(), "Oh no! " + description, Toast.LENGTH_SHORT).show();
         }
 
@@ -144,6 +134,24 @@ public class LoginActivity extends AppCompatActivity {
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             handler.proceed(); // Ignore SSL certificate errors
         }
+
+    }
+
+    @Override
+    public void onDataLoaded(int type, com.vkdisk.konstantin.vkdisk_mobile.pipline.Response response) {
+        switch (type) {
+            case LOGIN_CODE:
+                runOnUiThread(() -> {
+                    Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                    startActivity(intent);
+                });
+                break;
+
+        }
+    }
+
+    @Override
+    public void onDataLoadFailed() {
 
     }
 }
