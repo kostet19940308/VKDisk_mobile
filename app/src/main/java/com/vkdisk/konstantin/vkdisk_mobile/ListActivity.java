@@ -290,74 +290,90 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void loadFilterDocuments() {
-        final String cookies = pref.getString(getString(R.string.cookie), "");
-        final String csrf = pref.getString(getString(R.string.csrf), "");
-
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addNetworkInterceptor(interceptor)
-                .build();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getString(R.string.basic_url))
-                .client(client)
-                .build();
-        final DocumentRootFilterApi documentRootFilterApi = retrofit.create(DocumentRootFilterApi.class);
-        documentRootFilterApi.getAllFilterDocuments(
+        final DocumentRootFilterApi documentRootFilterApi = mStorage.getRetrofit().create(DocumentRootFilterApi.class);
+        ApiHandlerTask task = new ApiHandlerTask<>(documentRootFilterApi.getAllFilterDocuments(
                 filter,
                 sort,
-                (isDateReverse || isNameReverse ? "reverse" : null),
-                cookies,
-                csrf.substring(csrf.indexOf("=") + 1,
-                        csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d(LOG_TAG, String.valueOf(response.code()));
-                try {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
-                    FragmentManager fm = getSupportFragmentManager();
-                    // На самом деле я хз, на сколько это правильно так делать.
-                    // Но так фрагменты не накладываются друг на драга)
-                    fm.popBackStack();
-                    folderList = new DocumentLisFragment();
-                    folderList.setArguments(bundle);
-                    fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.document_list)).commit();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+                (isDateReverse || isNameReverse ? "reverse" : null)), LOAD_FILTERED_DOCS_TASK);
+        mStorage.addApiHandlerTask(task, this);
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d(LOG_TAG, t.getMessage());
-            }
-        });
+//        final String cookies = pref.getString(getString(R.string.cookie), "");
+//        final String csrf = pref.getString(getString(R.string.csrf), "");
+//
+//        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+//        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+//        OkHttpClient client = new OkHttpClient.Builder()
+//                .addNetworkInterceptor(interceptor)
+//                .build();
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl(getString(R.string.basic_url))
+//                .client(client)
+//                .build();
+//        final DocumentRootFilterApi documentRootFilterApi = retrofit.create(DocumentRootFilterApi.class);
+//        documentRootFilterApi.getAllFilterDocuments(
+//                filter,
+//                sort,
+//                (isDateReverse || isNameReverse ? "reverse" : null),
+//                cookies,
+//                csrf.substring(csrf.indexOf("=") + 1,
+//                        csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                Log.d(LOG_TAG, String.valueOf(response.code()));
+//                try {
+//                    Bundle bundle = new Bundle();
+//                    bundle.putString("data", String.valueOf(new JSONObject(response.body().string())));
+//                    FragmentManager fm = getSupportFragmentManager();
+//                    // На самом деле я хз, на сколько это правильно так делать.
+//                    // Но так фрагменты не накладываются друг на драга)
+//                    fm.popBackStack();
+//                    folderList = new DocumentLisFragment();
+//                    folderList.setArguments(bundle);
+//                    fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.document_list)).commit();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                Log.d(LOG_TAG, t.getMessage());
+//            }
+//        });
     }
 
     @Override
     public void onDataLoaded(int type, com.vkdisk.konstantin.vkdisk_mobile.pipline.Response response) {
-        switch (type) {
-            case LOAD_CHATS_TASK:
-                try {
-                    com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<String> castedResponse =
-                            (com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<String>) response;
-                    Bundle bundle = new Bundle();
+        try {
+            Bundle bundle = new Bundle();
+            com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<String> castedResponse =
+                    (com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<String>) response;
+            FragmentManager fm = getSupportFragmentManager();
+            switch (type) {
+                case LOAD_CHATS_TASK:
                     // JSONObject надо пихать в базу данных и выгружать из нее во фрагменте
                     bundle.putString("data", String.valueOf(new JSONObject(castedResponse.content)));
-                    FragmentManager fm = getSupportFragmentManager();
                     // На самом деле я хз, на сколько это правильно так делать.
                     // Но так фрагменты не накладываются друг на драга)
                     fm.popBackStack();
                     folderList = new FolderListFragment();
                     folderList.setArguments(bundle);
                     fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.chat_list)).commit();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
                 break;
+                case LOAD_FILTERED_DOCS_TASK:
+                    // JSONObject надо пихать в базу данных и выгружать из нее во фрагменте
+                    bundle.putString("data", String.valueOf(new JSONObject(castedResponse.content)));
+                    // На самом деле я хз, на сколько это правильно так делать.
+                    // Но так фрагменты не накладываются друг на драга)
+                    fm.popBackStack();
+                    folderList = new FolderListFragment();
+                    folderList.setArguments(bundle);
+                    fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.document_list)).commit();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 

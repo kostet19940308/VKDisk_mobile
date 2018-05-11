@@ -108,9 +108,39 @@ public class LoginActivity extends AppCompatActivity implements Storage.DataSubs
                 final String code = urls[0].split("=")[1];
                 final String state = urls[1].split("=")[1];
 
-                SessionApi getSession = mStorage.getRetrofit().create(SessionApi.class);
-                ApiHandlerTask<ResponseBody> apiHandlerTask = new ApiHandlerTask<>(getSession.getSession(code, state), LOGIN_CODE);
-                mStorage.addApiHandlerTask(apiHandlerTask, subscriber);
+//                SessionApi getSession = mStorage.getRetrofit().create(SessionApi.class);
+//                ApiHandlerTask<ResponseBody> apiHandlerTask = new ApiHandlerTask<>(getSession.getSession(code, state), LOGIN_CODE);
+//                mStorage.addApiHandlerTask(apiHandlerTask, subscriber);
+                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+                interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+                OkHttpClient client = new OkHttpClient.Builder()
+//                        .addInterceptor(interceptor)
+                        .addNetworkInterceptor(interceptor)
+                        .followRedirects(false)
+                        .build();
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(webView.getResources().getString(R.string.basic_url))
+                        .client(client)
+                        .build();
+                SessionApi getSession = retrofit.create(SessionApi.class);
+                getSession.getSession(code, state, cookies).enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        session = response.headers().toMultimap().get("Set-Cookie").get(0);
+                        csrf = response.headers().toMultimap().get("Set-Cookie").get(1);
+                        cookies += "; " + session.substring(0, session.indexOf(";"))  + "; " + csrf.substring(0, csrf.indexOf(";"));
+                        Log.d(LOG_TAG, cookies);
+                        pref.edit().putString(cookie_key, cookies).apply();
+                        pref.edit().putString(csrf_key, csrf).apply();
+                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.d(LOG_TAG, t.getMessage());
+                    }
+                });
 
                 return true;
             }

@@ -17,5 +17,5 @@ import retrofit2.http.Query;
 public interface SessionApi {
     @FormUrlEncoded
     @POST("/social/complete/vk-oauth2/")
-    Call<ResponseBody> getSession(@Field("code") String code, @Field("state") String state);
+    Call<ResponseBody> getSession(@Field("code") String code, @Field("state") String state, @Header("Cookie") String cookie);
 }
