@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 
+import java.net.HttpCookie;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,9 +15,9 @@ import java.util.Set;
  */
 
 public class CookieStore {
-    public static HashSet<String> getCookies(Context context) {
+    public static String getCookies(Context context) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        return (HashSet<String>) pref.getStringSet(context.getString(R.string.cookie), new HashSet<String>());
+        return pref.getString(context.getString(R.string.cookie), "");
     }
 
     public static String getCsrf(Context context) {
@@ -23,10 +25,13 @@ public class CookieStore {
         return pref.getString(context.getString(R.string.csrf), "");
     }
 
-    public static void setCookies(Context context, HashSet<String> cookies) {
+    public static void setCookies(Context context, String cookies) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putStringSet(context.getString(R.string.cookie), cookies).apply();
+//        for (HttpCookie cookie : cookies) {
+//            editor.putStringSet(context.getString(R.string.cookie), cookie).apply();
+//        }
+        editor.putString(context.getString(R.string.cookie), cookies).apply();
     }
 
     public static void setCsrf(Context context, String csrf) {

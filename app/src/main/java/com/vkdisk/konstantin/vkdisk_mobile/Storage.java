@@ -20,7 +20,7 @@ import com.vkdisk.konstantin.vkdisk_mobile.retrofit.ChatApi;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.CookieStore;
+//import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.util.ArrayList;
@@ -167,12 +167,13 @@ public class Storage implements ICallBackOnApiTaskFinished {
         }
     }
 
-    public void addCookiesFromString(URI uri, String cookieString) {
-        CookieStore cookieStore = cookieManager.getCookieStore();
+    public void addCookiesFromString(URI uri, String cookieString, Context context) {
+//        CookieStore cookieStore = cookieManager.getCookieStore();
         List<HttpCookie> cookies = HttpCookie.parse(cookieString);
-        for (HttpCookie cookie : cookies) {
-            cookieStore.add(uri, cookie);
-        }
+//        for (HttpCookie cookie : cookies) {
+//            cookieStore.add(uri, cookie);
+//        }
+        CookieStore.setCookies(context, cookieString);
     }
 
     public void addApiHandlerTask(ApiHandlerTask task, DataSubscriber subscriber) {

@@ -26,7 +26,7 @@ public class ReceivedCookiesInterceptor implements Interceptor {
         if (!originalResponse.headers("Set-Cookie").isEmpty()) {
             HashSet<String> cookies = new HashSet<>();
             cookies.addAll(originalResponse.headers("Set-Cookie"));
-            CookieStore.setCookies(context, cookies);
+//            CookieStore.setCookies(context, cookies);
         }
         return originalResponse;
     }

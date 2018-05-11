@@ -122,7 +122,7 @@ public class LoginActivity extends AppCompatActivity implements Storage.DataSubs
         public void onPageFinished(WebView view, String url) {
             cookies = CookieManager.getInstance().getCookie(loginUrl);
 
-            mStorage.addCookiesFromString(URI.create(loginUrl), cookies);
+            mStorage.addCookiesFromString(URI.create(loginUrl), cookies, getApplicationContext());
             Log.d(LOG_TAG, "All the cookies in a string:" + cookies);
         }
 
