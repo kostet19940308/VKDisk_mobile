@@ -10,6 +10,8 @@ import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 import com.vkdisk.konstantin.vkdisk_mobile.downloaders.ApiDataDownloader;
 import com.vkdisk.konstantin.vkdisk_mobile.downloaders.ICallBackOnApiTaskFinished;
+import com.vkdisk.konstantin.vkdisk_mobile.interceptors.AddCookiesInterceptor;
+import com.vkdisk.konstantin.vkdisk_mobile.interceptors.ReceivedCookiesInterceptor;
 import com.vkdisk.konstantin.vkdisk_mobile.libs.PersistentCookieStore;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.BaseHandlerTask;
@@ -68,9 +70,9 @@ public class Storage implements ICallBackOnApiTaskFinished {
     }
 
     private void initRetrofit(String basicUrl, Context ctx) {
-        cookieManager = new CookieManager(
-                new PersistentCookieStore(ctx), CookiePolicy.ACCEPT_ALL
-        );
+//        cookieManager = new CookieManager(
+//                new PersistentCookieStore(ctx), CookiePolicy.ACCEPT_ALL
+//        );
 //        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
 //        ClearableCookieJar cookieJar =
@@ -79,15 +81,17 @@ public class Storage implements ICallBackOnApiTaskFinished {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .cookieJar(new JavaNetCookieJar(cookieManager))
+        OkHttpClient.Builder client = new OkHttpClient.Builder()
+//                .cookieJar(new JavaNetCookieJar(cookieManager))
 //                .cookieJar(cookieJar)
-                .addNetworkInterceptor(interceptor)
-                .build();
+                .addNetworkInterceptor(interceptor);
+
+        client.interceptors().add(new AddCookiesInterceptor(ctx));
+        client.interceptors().add(new ReceivedCookiesInterceptor(ctx));
 
         retrofit = new Retrofit.Builder()
                 .baseUrl(basicUrl)
-                .client(client)
+                .client(client.build())
                 .build();
     }
 
