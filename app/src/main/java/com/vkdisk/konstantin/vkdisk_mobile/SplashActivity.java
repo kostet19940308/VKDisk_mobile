@@ -10,18 +10,14 @@ import android.util.Log;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private String cookie_key;
     private Intent intent;
-    private String csrf_key;
+    private Storage mStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        cookie_key = getString(R.string.cookie);
-        csrf_key = getString(R.string.csrf);
-        SharedPreferences pref =  PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Log.d("Fakkkkk", pref.getString(cookie_key, ""));
-        if(pref.contains(cookie_key) && pref.contains(csrf_key)){
+        mStorage = Storage.getOrCreateInstance(getApplicationContext());
+        if(mStorage.isAuthed()){
             intent = new Intent(this, ListActivity.class);
         }else {
             intent = new Intent(this, MainActivity.class);

@@ -25,13 +25,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 public class Storage implements ICallBackOnApiTaskFinished {
+
+    private static final String COOKIE_SESSION_ID = "sessionid";
+    private static final String COOKIE_CSRF = "csrftoken";
+
 
     public interface DataSubscriber {
         void onDataLoaded(int type, Response response);
@@ -49,7 +57,10 @@ public class Storage implements ICallBackOnApiTaskFinished {
         return _instance;
     }
 
+    private String basicUrl;
+
     private CookieManager cookieManager;
+    private CookieJar cookieJar;
     private Retrofit retrofit;
 
     private ChatApi chatApi;
@@ -59,7 +70,7 @@ public class Storage implements ICallBackOnApiTaskFinished {
     private Map<BaseHandlerTask, List<DataSubscriber>> commandSubscriberMap;
 
     private Storage(Context context) {
-        String basicUrl = context.getString(R.string.basic_url);
+        basicUrl = context.getString(R.string.basic_url);
         initRetrofit(basicUrl, context);
         initRetrofitApies();
         initDownloaders();
@@ -83,6 +94,7 @@ public class Storage implements ICallBackOnApiTaskFinished {
                 .cookieJar(new JavaNetCookieJar(cookieManager))
 //                .cookieJar(cookieJar)
                 .addNetworkInterceptor(interceptor)
+                .readTimeout(30, TimeUnit.SECONDS)
                 .build();
 
         retrofit = new Retrofit.Builder()
@@ -100,17 +112,7 @@ public class Storage implements ICallBackOnApiTaskFinished {
     }
 
     private void initDownloaders() {
-        apiDataDownloader = new ApiDataDownloader("APIDataDownloader", new ICallBackOnApiTaskFinished() {
-            @Override
-            public void onResponse(ApiHandlerTask task, int actionCode, Response response) {
-
-            }
-
-            @Override
-            public void onFailure(ApiHandlerTask task) {
-
-            }
-        });
+        apiDataDownloader = new ApiDataDownloader("APIDataDownloader", this);
         apiDataDownloader.start();
         apiDataDownloader.prepareHandler();
     }
@@ -120,7 +122,7 @@ public class Storage implements ICallBackOnApiTaskFinished {
             commandSubscriberMap.put(task, new ArrayList<DataSubscriber>());
         }
         List<DataSubscriber> subscribers = commandSubscriberMap.get(task);
-        if(!subscribers.contains(subscriber)) {
+        if (!subscribers.contains(subscriber)) {
             subscribers.add(subscriber);
         }
     }
@@ -169,6 +171,21 @@ public class Storage implements ICallBackOnApiTaskFinished {
         for (HttpCookie cookie : cookies) {
             cookieStore.add(uri, cookie);
         }
+    }
+
+    public boolean isAuthed() {
+        List<HttpCookie> cookies = cookieManager.getCookieStore().get(URI.create(basicUrl));
+        boolean csrfExists = false;
+        boolean sessionidExists = false;
+        for (HttpCookie cookie: cookies) {
+            if (cookie.getName().equals(COOKIE_SESSION_ID)) {
+                sessionidExists = true;
+            }
+            if (cookie.getName().equals(COOKIE_CSRF)) {
+                csrfExists = true;
+            }
+        }
+        return csrfExists && sessionidExists;
     }
 
     public void addApiHandlerTask(ApiHandlerTask task, DataSubscriber subscriber) {

@@ -16,7 +16,5 @@ public interface DocumentRootFilterApi {
     @GET("/api/v1/documents/?root&filter")
     Call<ResponseBody> getAllFilterDocuments(@Query("name") String filter,
                                              @Query("sort") String sort,
-                                             @Query("reverse") String reverse,
-                                             @Header("Cookie") String cookie,
-                                             @Header("X-CSRFtoken") String csrf);
+                                             @Query("reverse") String reverse);
 }
