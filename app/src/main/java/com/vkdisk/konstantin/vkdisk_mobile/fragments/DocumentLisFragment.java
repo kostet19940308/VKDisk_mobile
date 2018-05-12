@@ -50,9 +50,6 @@ public class DocumentLisFragment extends Fragment implements ClickDocumentRecycl
         try {
             // Эту хрень надо из базы данных выгружать
             jsonObject = new JSONObject(getArguments().getString("data"));
-            SharedPreferences pref =  PreferenceManager.getDefaultSharedPreferences(this.getContext());
-            cookies = pref.getString(getString(R.string.cookie), "");
-            csrf = pref.getString(getString(R.string.csrf), "");
             Log.d(TAG, String.valueOf(jsonObject));
         } catch (JSONException e) {
             try {

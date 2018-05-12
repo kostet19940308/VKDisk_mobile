@@ -1,6 +1,5 @@
 package com.vkdisk.konstantin.vkdisk_mobile;
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -9,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import com.vkdisk.konstantin.vkdisk_mobile.fragments.DocumentLisFragment;
 import com.vkdisk.konstantin.vkdisk_mobile.fragments.FolderListFragment;
+import com.vkdisk.konstantin.vkdisk_mobile.fragments.FolderViewFragment;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ClickRecyclerAdapter;
@@ -290,12 +291,16 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void loadFilterDocuments() {
-        final DocumentRootFilterApi documentRootFilterApi = mStorage.getRetrofit().create(DocumentRootFilterApi.class);
-        ApiHandlerTask<ResponseBody> task = new ApiHandlerTask<>(documentRootFilterApi.getAllFilterDocuments(
-                filter,
-                sort,
-                (isDateReverse || isNameReverse ? "reverse" : null)), LOAD_FILTERED_DOCS_TASK);
-        mStorage.addApiHandlerTask(task, this);
+//        final DocumentRootFilterApi documentRootFilterApi = mStorage.getRetrofit().create(DocumentRootFilterApi.class);
+//        ApiHandlerTask<ResponseBody> task = new ApiHandlerTask<>(documentRootFilterApi.getAllFilterDocuments(
+//                filter,
+//                sort,
+//                (isDateReverse || isNameReverse ? "reverse" : null)), LOAD_FILTERED_DOCS_TASK);
+//        mStorage.addApiHandlerTask(task, this);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        Fragment fragment = new FolderViewFragment();
+        transaction.replace(R.id.fragment, fragment, getString(R.string.chat_list));
+        transaction.commit();
     }
 
     @Override

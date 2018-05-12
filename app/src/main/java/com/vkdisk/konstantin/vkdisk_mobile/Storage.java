@@ -34,6 +34,7 @@ import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Storage implements ICallBackOnApiTaskFinished {
 
@@ -100,6 +101,7 @@ public class Storage implements ICallBackOnApiTaskFinished {
         retrofit = new Retrofit.Builder()
                 .baseUrl(basicUrl)
                 .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
 

@@ -39,10 +39,6 @@ public class LoginActivity extends AppCompatActivity implements Storage.DataSubs
     private String loginUrl;
     private String cookies;
     private String redirectUrl;
-    private String csrf;
-    private String session;
-    private String cookie_key;
-    private String csrf_key;
     private SharedPreferences pref;
 
     private Storage mStorage;
@@ -63,8 +59,6 @@ public class LoginActivity extends AppCompatActivity implements Storage.DataSubs
         webView.getSettings().setJavaScriptEnabled(true);
         loginUrl = getString(R.string.auth_url);
         redirectUrl = getString(R.string.redirect_url);
-        cookie_key = getString(R.string.cookie);
-        csrf_key = getString(R.string.csrf);
         mStorage = Storage.getOrCreateInstance(getApplicationContext());
     }
 

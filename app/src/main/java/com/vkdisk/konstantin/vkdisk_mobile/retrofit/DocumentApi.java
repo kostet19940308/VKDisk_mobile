@@ -1,5 +1,8 @@
 package com.vkdisk.konstantin.vkdisk_mobile.retrofit;
 
+import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
+import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListResponse;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -12,5 +15,8 @@ import retrofit2.http.Query;
 
 public interface DocumentApi {
     @GET("/api/v1/documents/")
-    Call<ResponseBody> getAllDocuments(@Query("folder") int folderId, @Header("Cookie") String cookie, @Header("X-CSRFtoken") String csrf);
+    Call<ApiListResponse<Document>> getAllDocuments(@Query("folder") int folderId);
+
+    @GET("/api/v1/documents/?root&filter")
+    Call<ApiListResponse<Document>> getRootDocuments();
 }

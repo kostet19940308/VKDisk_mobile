@@ -5,6 +5,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Folder {
 
+    public static final int COMMON_FOLDER_TYPE = 0;
+    public static final int CHAT_FOLDER_TYPE = 1;
+
     @SerializedName("id")
     @Expose
     private Integer id;
@@ -59,6 +62,13 @@ public class Folder {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public int getIntType() {
+        if (!type.isEmpty() || type.equals("chat")) {
+            return CHAT_FOLDER_TYPE;
+        }
+        return COMMON_FOLDER_TYPE;
     }
 
 }

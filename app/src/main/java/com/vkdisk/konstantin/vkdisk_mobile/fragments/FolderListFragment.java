@@ -125,30 +125,30 @@ public class FolderListFragment extends Fragment implements
                 .client(client)
                 .build();
         final DocumentApi documentApi = retrofit.create(DocumentApi.class);
-        documentApi.getAllDocuments(Integer.parseInt(ItemRecyclerAdapter.jsonArray.getJSONObject(position).getString("id")), cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d(TAG, String.valueOf(response.code()));
-                try {
-                    JSONObject jsonObject = new JSONObject(response.body().string());
-                    Log.d(TAG, String.valueOf(jsonObject));
-                    Bundle bundle = new Bundle();
-                    bundle.putString("data", String.valueOf(jsonObject));
-                    documentLisFragment.setArguments(bundle);
-                    fragmentTransaction = getFragmentManager().beginTransaction();
-                    fragmentTransaction.replace(R.id.fragment, documentLisFragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d(TAG, t.getMessage());
-            }
-        });
+//        documentApi.getAllDocuments(Integer.parseInt(ItemRecyclerAdapter.jsonArray.getJSONObject(position).getString("id")), cookies, csrf.substring(csrf.indexOf("=") + 1, csrf.indexOf(";"))).enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                Log.d(TAG, String.valueOf(response.code()));
+//                try {
+//                    JSONObject jsonObject = new JSONObject(response.body().string());
+//                    Log.d(TAG, String.valueOf(jsonObject));
+//                    Bundle bundle = new Bundle();
+//                    bundle.putString("data", String.valueOf(jsonObject));
+//                    documentLisFragment.setArguments(bundle);
+//                    fragmentTransaction = getFragmentManager().beginTransaction();
+//                    fragmentTransaction.replace(R.id.fragment, documentLisFragment);
+//                    fragmentTransaction.addToBackStack(null);
+//                    fragmentTransaction.commit();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                Log.d(TAG, t.getMessage());
+//            }
+//        });
     }
 }

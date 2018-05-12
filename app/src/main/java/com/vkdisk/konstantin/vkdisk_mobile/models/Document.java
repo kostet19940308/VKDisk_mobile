@@ -16,7 +16,7 @@ public class Document {
     private Integer author;
     @SerializedName("folder")
     @Expose
-    private Folder folder;
+    private String folder;
     @SerializedName("vk_url")
     @Expose
     private String vkUrl;
@@ -45,11 +45,11 @@ public class Document {
         this.author = author;
     }
 
-    public Folder getFolder() {
+    public String getFolder() {
         return folder;
     }
 
-    public void setFolder(Folder folder) {
+    public void setFolder(String folder) {
         this.folder = folder;
     }
 
