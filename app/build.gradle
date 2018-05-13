@@ -39,4 +39,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile 'su.j2e:rv-joiner:1.0.3'
 }

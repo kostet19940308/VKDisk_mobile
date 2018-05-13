@@ -39,7 +39,7 @@ public class DocumentItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHo
     public void onBindViewHolder(ItemViewHolder holder, int position) {
         Document folder = mData.get(position);
         holder.setText(folder.getTitle());
-        holder.setIcon("folder");
+        holder.setIcon("document");
     }
 
     @Override

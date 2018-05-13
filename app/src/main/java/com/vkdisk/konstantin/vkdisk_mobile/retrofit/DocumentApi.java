@@ -18,5 +18,7 @@ public interface DocumentApi {
     Call<ApiListResponse<Document>> getAllDocuments(@Query("folder") int folderId);
 
     @GET("/api/v1/documents/?root&filter")
-    Call<ApiListResponse<Document>> getRootDocuments();
+    Call<ApiListResponse<Document>> getRootDocuments(@Query("name") String filter,
+                                                     @Query("sort") String sort,
+                                                     @Query("reverse") String reverse);
 }

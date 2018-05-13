@@ -56,4 +56,8 @@ public class FolderItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHold
         mData = data;
         notifyDataSetChanged();
     }
+
+    public int getFolderId(int position) {
+        return mData.get(position).getId();
+    }
 }

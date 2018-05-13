@@ -3,6 +3,7 @@ package com.vkdisk.konstantin.vkdisk_mobile.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,7 +11,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.vkdisk.konstantin.vkdisk_mobile.ListActivity;
 import com.vkdisk.konstantin.vkdisk_mobile.R;
 import com.vkdisk.konstantin.vkdisk_mobile.Storage;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
@@ -19,6 +22,7 @@ import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListResponse;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.Response;
+import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickFolderAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.DocumentItemRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.FolderItemRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentApi;
@@ -27,7 +31,11 @@ import com.vkdisk.konstantin.vkdisk_mobile.retrofit.FolderApi;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FolderViewFragment extends Fragment implements Storage.DataSubscriber {
+import su.j2e.rvjoiner.JoinableAdapter;
+import su.j2e.rvjoiner.JoinableLayout;
+import su.j2e.rvjoiner.RvJoiner;
+
+public class FolderViewFragment extends Fragment implements Storage.DataSubscriber, ClickFolderAdapter.OnItemClickListener {
 
     private static final String LOGGER_KEY = FolderViewFragment.class.getSimpleName();
 
@@ -39,10 +47,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     private int folderId;
     private Storage mStorage;
 
-    private RecyclerView folderListRecyclerView;
-    private FolderItemRecyclerAdapter folderItemRecyclerAdapter;
-
-    private RecyclerView documentsListRecyclerView;
+    private ClickFolderAdapter folderItemRecyclerAdapter;
     private DocumentItemRecyclerAdapter documentItemRecyclerAdapter;
 
     @Override
@@ -67,21 +72,18 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.folder_view_page, container, false);;
 
-        folderListRecyclerView = view.findViewById(R.id.folder_view_folder_list);
-        folderItemRecyclerAdapter = new FolderItemRecyclerAdapter(getActivity().getLayoutInflater(), new ArrayList<>());
-
-        folderListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        folderListRecyclerView.setAdapter(folderItemRecyclerAdapter);
-        //        folderListRecyclerView.setHasFixedSize(true);
+        folderItemRecyclerAdapter = new ClickFolderAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this);
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
-        folderListRecyclerView.addItemDecoration(itemDecoration);
-
-        documentsListRecyclerView = view.findViewById(R.id.folder_view_document_list);
         documentItemRecyclerAdapter = new DocumentItemRecyclerAdapter(getActivity().getLayoutInflater(), new ArrayList<>());
-        documentsListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        documentsListRecyclerView.setAdapter(documentItemRecyclerAdapter);
-        documentsListRecyclerView.addItemDecoration(itemDecoration);
+        RecyclerView rv = (RecyclerView) view.findViewById(R.id.folder_view_folder_list);
+        rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        RvJoiner rvJoiner = new RvJoiner();
+        rvJoiner.add(new JoinableAdapter(folderItemRecyclerAdapter));
+        rvJoiner.add(new JoinableAdapter(documentItemRecyclerAdapter));
+
+        rv.setAdapter(rvJoiner.getAdapter());
+        rv.addItemDecoration(itemDecoration);
         return view;
     }
 
@@ -90,12 +92,15 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         DocumentApi documentApi = mStorage.getRetrofit().create(DocumentApi.class);
         ApiListHandlerTask<Folder> task;
         ApiListHandlerTask<Document> docTask;
+        String sort = ((ListActivity)getActivity()).getSort();
+        String filter = ((ListActivity)getActivity()).getFilter();
+        String reverse = ((ListActivity)getActivity()).getReverse();
         if (folderId > 0) {
             task = new ApiListHandlerTask<Folder>(folderApi.getFolders(folderId), FOLDER_LOAD_TASK_KEY);
             docTask = new ApiListHandlerTask<>(documentApi.getAllDocuments(folderId), DOCUMENT_LOAD_TASK_KEY);
         } else {
             task = new ApiListHandlerTask<Folder>(folderApi.getRootFolders(), FOLDER_LOAD_TASK_KEY);
-            docTask = new ApiListHandlerTask<>(documentApi.getRootDocuments(), DOCUMENT_LOAD_TASK_KEY);
+            docTask = new ApiListHandlerTask<>(documentApi.getRootDocuments(filter, sort, reverse), DOCUMENT_LOAD_TASK_KEY);
         }
         mStorage.addApiHandlerTask(task, this);
         mStorage.addApiHandlerTask(docTask, this);
@@ -130,5 +135,21 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     @Override
     public void onDataLoadFailed() {
         Log.d(LOGGER_KEY, "Data not loaded");
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        Toast.makeText(this.getContext(), String.valueOf(folderItemRecyclerAdapter.getFolderId(position)), Toast.LENGTH_SHORT).show();
+        folderId = folderItemRecyclerAdapter.getFolderId(position);
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment, new FolderViewFragment());
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt(FOLDER_ID_BUNDLE_KEY, folderId);
+        super.onSaveInstanceState(outState);
     }
 }

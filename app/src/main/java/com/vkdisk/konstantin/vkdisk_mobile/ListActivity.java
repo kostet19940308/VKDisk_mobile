@@ -298,8 +298,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 //                (isDateReverse || isNameReverse ? "reverse" : null)), LOAD_FILTERED_DOCS_TASK);
 //        mStorage.addApiHandlerTask(task, this);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        Fragment fragment = new FolderViewFragment();
-        transaction.replace(R.id.fragment, fragment, getString(R.string.chat_list));
+        folderList = new FolderViewFragment();
+        transaction.replace(R.id.fragment, folderList, getString(R.string.document_list));
         transaction.commit();
     }
 
@@ -351,5 +351,17 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onDataLoadFailed() {
 
+    }
+
+    public String getSort() {
+        return sort;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public String getReverse() {
+        return isDateReverse || isNameReverse ? "reverse" : null;
     }
 }
