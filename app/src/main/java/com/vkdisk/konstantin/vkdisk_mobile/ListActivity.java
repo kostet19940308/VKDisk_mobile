@@ -56,6 +56,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     public final String LOG_TAG = this.getClass().getSimpleName();
     private final static int LOAD_CHATS_TASK = 1;
     private final static int LOAD_FILTERED_DOCS_TASK = 2;
+    public static final String FOLDER_ID_BUNDLE_KEY = "folder_id";
 
     Fragment folderList;
     Toolbar toolbar;
@@ -299,6 +300,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 //        mStorage.addApiHandlerTask(task, this);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         folderList = new FolderViewFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(FOLDER_ID_BUNDLE_KEY, 0);
+        folderList.setArguments(bundle);
         transaction.replace(R.id.fragment, folderList, getString(R.string.document_list));
         transaction.commit();
     }

@@ -15,7 +15,10 @@ import retrofit2.http.Query;
 
 public interface DocumentApi {
     @GET("/api/v1/documents/")
-    Call<ApiListResponse<Document>> getAllDocuments(@Query("folder") int folderId);
+    Call<ApiListResponse<Document>> getAllDocuments(@Query("folder") int folderId,
+                                                    @Query("name") String filter,
+                                                    @Query("sort") String sort,
+                                                    @Query("reverse") String reverse);
 
     @GET("/api/v1/documents/?root&filter")
     Call<ApiListResponse<Document>> getRootDocuments(@Query("name") String filter,

@@ -56,7 +56,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         if (savedInstanceState != null) {
             folderId = savedInstanceState.getInt(FOLDER_ID_BUNDLE_KEY);
         } else {
-            folderId = 0;
+            folderId = getArguments().getInt(FOLDER_ID_BUNDLE_KEY);
         }
         mStorage = Storage.getOrCreateInstance(getActivity().getApplicationContext());
     }
@@ -97,7 +97,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         String reverse = ((ListActivity)getActivity()).getReverse();
         if (folderId > 0) {
             task = new ApiListHandlerTask<Folder>(folderApi.getFolders(folderId), FOLDER_LOAD_TASK_KEY);
-            docTask = new ApiListHandlerTask<>(documentApi.getAllDocuments(folderId), DOCUMENT_LOAD_TASK_KEY);
+            docTask = new ApiListHandlerTask<>(documentApi.getAllDocuments(folderId, filter, sort, reverse), DOCUMENT_LOAD_TASK_KEY);
         } else {
             task = new ApiListHandlerTask<Folder>(folderApi.getRootFolders(), FOLDER_LOAD_TASK_KEY);
             docTask = new ApiListHandlerTask<>(documentApi.getRootDocuments(filter, sort, reverse), DOCUMENT_LOAD_TASK_KEY);
@@ -123,7 +123,6 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                 });
                 break;
             case DOCUMENT_LOAD_TASK_KEY:
-
                 getActivity().runOnUiThread(() -> {
                     Response<ApiListResponse<Document>> castedResponse = (Response<ApiListResponse<Document>>)response;
                     documentItemRecyclerAdapter.setNewData(castedResponse.content.getResults());
@@ -139,10 +138,12 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this.getContext(), String.valueOf(folderItemRecyclerAdapter.getFolderId(position)), Toast.LENGTH_SHORT).show();
-        folderId = folderItemRecyclerAdapter.getFolderId(position);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment, new FolderViewFragment());
+        Bundle bundle = new Bundle();
+        bundle.putInt(FOLDER_ID_BUNDLE_KEY, folderItemRecyclerAdapter.getFolderId(position));
+        FolderViewFragment folderViewFragment = new FolderViewFragment();
+        folderViewFragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.fragment, folderViewFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }

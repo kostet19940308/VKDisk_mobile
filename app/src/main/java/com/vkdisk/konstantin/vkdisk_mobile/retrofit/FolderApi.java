@@ -13,6 +13,6 @@ public interface FolderApi {
     @GET("/api/v1/folders/?large")
     Call<ApiListResponse<Folder>> getFolders(@Query("folder") int folderId);
 
-    @GET("/api/v1/folders/?large&root")
+    @GET("/api/v1/folders/?large&transfer")
     Call<ApiListResponse<Folder>> getRootFolders();
 }
