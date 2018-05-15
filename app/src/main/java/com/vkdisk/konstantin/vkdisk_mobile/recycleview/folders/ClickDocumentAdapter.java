@@ -7,41 +7,38 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
-import com.vkdisk.konstantin.vkdisk_mobile.models.Folder;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ItemViewHolder;
-
-import org.json.JSONException;
 
 import java.util.List;
 
 /**
- * Created by nagai on 13.05.2018.
+ * Created by nagai on 15.05.2018.
  */
 
-public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements View.OnClickListener{
+public class ClickDocumentAdapter extends DocumentItemRecyclerAdapter implements View.OnLongClickListener {
 
+    private final OnItemLongClickListener onLongClickListener;
 
-    public ClickFolderAdapter(LayoutInflater inflater, List<Folder> data, ClickFolderAdapter.OnItemClickListener mClickListener) {
+    public ClickDocumentAdapter(LayoutInflater inflater, List<Document> data, ClickDocumentAdapter.OnItemLongClickListener onLongClickListener) {
         super(inflater, data);
-        this.mClickListener = mClickListener;
-    }
-
-
-    public interface OnItemClickListener {
-        void onItemClick(View view, int position);
+        this.onLongClickListener = onLongClickListener;
     }
 
     public interface OnItemLongClickListener {
         void onItemLongClick(View view, int position);
     }
 
-    private final OnItemClickListener mClickListener;
-
+    @Override
+    public boolean onLongClick(View view) {
+        Integer position = (Integer)view.getTag();
+        onLongClickListener.onItemLongClick(view, position);
+        return true;
+    }
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ItemViewHolder holder = super.onCreateViewHolder(parent, viewType);
-        holder.itemView.setOnClickListener(this);
+        holder.itemView.setOnLongClickListener(this);
 
         return holder;
     }
@@ -51,11 +48,5 @@ public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements Vie
     public void onBindViewHolder(ItemViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
         holder.itemView.setTag(position);
-    }
-
-    @Override
-    public void onClick(View v) {
-        Integer position = (Integer)v.getTag();
-        mClickListener.onItemClick(v, position);
     }
 }

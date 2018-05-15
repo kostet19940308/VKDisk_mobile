@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -53,9 +55,13 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     MenuItem sortDateItem;
     MenuItem sortNameArrowItem;
     MenuItem sortDateArrowItem;
+    MenuItem cross;
+    MenuItem checked;
+    MenuItem trash;
     String sort;
     String filter;
     private Storage mStorage;
+    private int checkCount;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -194,6 +200,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortDateItem = menu.findItem(R.id.action_sort_date);
         sortDateArrowItem = menu.findItem(R.id.action_sort_date_arrow);
         sortNameArrowItem = menu.findItem(R.id.action_sort_name_arrow);
+        cross = menu.findItem(R.id.cross);
+        checked = menu.findItem(R.id.checked);
+        trash = menu.findItem(R.id.trash);
 
         setSort();
 
@@ -219,12 +228,16 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortDateItem.setVisible(false);
         sortDateArrowItem.setVisible(false);
         sortNameArrowItem.setVisible(false);
+        cross.setVisible(false);
+        checked.setVisible(false);
+        trash.setVisible(false);
         // Тут надо добавить если выделяется хотя бы один файл, появляется возможность удалить их,
         // Переименовать, если выделен только один файл, в перспективе переместить в папку
         // Изменящиеся хрени в toolbar надо сунуть в menu_main
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.equals(sortItem)) {
@@ -241,6 +254,12 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             });
         } else if (toggle.onOptionsItemSelected(item)) {
             return true;
+        } else if (item.equals(trash) && Objects.equals(fragmentName, getString(R.string.document_list))) {
+            folderList.deleteFiles();
+            setCheckCount(0);
+        } else if (item.equals(cross) && Objects.equals(fragmentName, getString(R.string.document_list))) {
+            folderList.setUnChecked();
+            setCheckCount(0);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -308,5 +327,20 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     public void setFragmentName(String fragmentName) {
         this.fragmentName = fragmentName;
+    }
+
+    public void setCheckCount(int checkCount) {
+        this.checkCount = checkCount;
+        sortNameItem.setVisible(false);
+        sortDateItem.setVisible(false);
+        sortDateArrowItem.setVisible(false);
+        sortNameArrowItem.setVisible(false);
+        searchItem.setVisible(this.checkCount == 0);
+        sortItem.setVisible(this.checkCount == 0);
+        cross.setVisible(this.checkCount != 0);
+        checked.setVisible(this.checkCount != 0);
+        trash.setVisible(this.checkCount != 0);
+        checked.setTitle(String.format("CHECKED %s FILES", this.checkCount));
+        getSupportActionBar().setDisplayShowTitleEnabled(this.checkCount == 0);
     }
 }

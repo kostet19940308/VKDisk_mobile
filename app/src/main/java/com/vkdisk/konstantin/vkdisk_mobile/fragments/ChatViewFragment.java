@@ -32,7 +32,8 @@ import static com.vkdisk.konstantin.vkdisk_mobile.fragments.FolderViewFragment.F
  * Created by nagai on 15.05.2018.
  */
 
-public class ChatViewFragment extends Fragment implements Storage.DataSubscriber, ClickFolderAdapter.OnItemClickListener {
+public class ChatViewFragment extends Fragment implements Storage.DataSubscriber,
+        ClickFolderAdapter.OnItemClickListener, ClickFolderAdapter.OnItemLongClickListener {
 
     public static final int CHAT_LOAD_TASK_KEY = 3;
     private Storage mStorage;
@@ -113,5 +114,10 @@ public class ChatViewFragment extends Fragment implements Storage.DataSubscriber
     public void onDestroy() {
         mStorage.unsubscribe(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void onItemLongClick(View view, int position) {
+
     }
 }

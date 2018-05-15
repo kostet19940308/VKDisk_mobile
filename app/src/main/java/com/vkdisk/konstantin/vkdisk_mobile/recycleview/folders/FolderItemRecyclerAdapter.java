@@ -1,5 +1,6 @@
 package com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders;
 
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
@@ -45,6 +46,9 @@ public class FolderItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHold
         Folder folder = mData.get(position);
         holder.setText(folder.getTitle());
         holder.setIcon("folder");
+//        if (folder.getIsChecked()) {
+//            holder.itemView.setBackgroundColor(Color.CYAN);
+//        }
     }
 
     @Override
@@ -59,5 +63,9 @@ public class FolderItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHold
 
     public int getFolderId(int position) {
         return mData.get(position).getId();
+    }
+
+    public void setChecked(int position) {
+        mData.get(position).setChecked();
     }
 }

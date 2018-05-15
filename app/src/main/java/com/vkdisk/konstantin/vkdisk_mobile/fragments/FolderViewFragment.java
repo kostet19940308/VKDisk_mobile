@@ -1,7 +1,9 @@
 package com.vkdisk.konstantin.vkdisk_mobile.fragments;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DividerItemDecoration;
@@ -22,6 +24,7 @@ import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListResponse;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.Response;
+import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickDocumentAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickFolderAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.DocumentItemRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.FolderItemRecyclerAdapter;
@@ -35,7 +38,9 @@ import su.j2e.rvjoiner.JoinableAdapter;
 import su.j2e.rvjoiner.JoinableLayout;
 import su.j2e.rvjoiner.RvJoiner;
 
-public class FolderViewFragment extends Fragment implements Storage.DataSubscriber, ClickFolderAdapter.OnItemClickListener {
+public class FolderViewFragment extends Fragment implements Storage.DataSubscriber,
+        ClickFolderAdapter.OnItemClickListener,
+        ClickDocumentAdapter.OnItemLongClickListener {
 
     private static final String LOGGER_KEY = FolderViewFragment.class.getSimpleName();
 
@@ -75,7 +80,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         folderItemRecyclerAdapter = new ClickFolderAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this);
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
-        documentItemRecyclerAdapter = new DocumentItemRecyclerAdapter(getActivity().getLayoutInflater(), new ArrayList<>());
+        documentItemRecyclerAdapter = new ClickDocumentAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this);
         RecyclerView rv = (RecyclerView) view.findViewById(R.id.folder_view_folder_list);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         RvJoiner rvJoiner = new RvJoiner();
@@ -153,5 +158,21 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(FOLDER_ID_BUNDLE_KEY, folderId);
         super.onSaveInstanceState(outState);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onItemLongClick(View view, int position) {
+        documentItemRecyclerAdapter.setChecked(position);
+        ((ListActivity)getActivity()).setCheckCount(documentItemRecyclerAdapter.getCheckedCount());
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void deleteFiles() {
+        documentItemRecyclerAdapter.deleteCheckedFiles();
+    }
+
+    public void setUnChecked() {
+        documentItemRecyclerAdapter.setUnChecked();
     }
 }

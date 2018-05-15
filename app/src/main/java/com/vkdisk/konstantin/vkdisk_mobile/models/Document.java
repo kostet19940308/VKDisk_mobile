@@ -21,6 +21,8 @@ public class Document {
     @Expose
     private String vkUrl;
 
+    private boolean isChecked = false;
+
     public Integer getId() {
         return id;
     }
@@ -59,6 +61,14 @@ public class Document {
 
     public void setVkUrl(String vkUrl) {
         this.vkUrl = vkUrl;
+    }
+
+    public void setChecked() {
+        isChecked = !isChecked;
+    }
+
+    public boolean getIsChecked() {
+        return isChecked;
     }
 
 }

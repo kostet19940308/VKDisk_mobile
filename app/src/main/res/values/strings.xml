@@ -24,4 +24,6 @@
 
     <string name="name">NAME</string>
     <string name="date">DATE</string>
+    <string name="cross">CROSS</string>
+    <string name="checked">Checked</string>
 </resources>

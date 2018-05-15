@@ -33,4 +33,21 @@
         app:showAsAction="always"
         android:icon="@drawable/sort"
         android:title="@string/name"/>
+    <item
+        android:id="@+id/trash"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/trash"
+        android:title="@string/checked"/>
+    <item
+        android:id="@+id/checked"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:title="@string/checked"/>
+    <item
+        android:id="@+id/cross"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/cross"
+        android:title="@string/cross"/>
 </menu>

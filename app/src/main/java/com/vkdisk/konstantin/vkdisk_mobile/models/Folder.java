@@ -24,6 +24,8 @@ public class Folder {
     @Expose
     private String type;
 
+    private boolean isChecked = false;
+
     public Integer getId() {
         return id;
     }
@@ -71,4 +73,11 @@ public class Folder {
         return COMMON_FOLDER_TYPE;
     }
 
+    public void setChecked() {
+        isChecked = !isChecked;
+    }
+
+    public boolean getIsChecked() {
+        return isChecked;
+    }
 }
