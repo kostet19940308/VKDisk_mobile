@@ -87,7 +87,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         return view;
     }
 
-    private void sendRequestForData() {
+    public void sendRequestForData() {
         FolderApi folderApi = mStorage.getRetrofit().create(FolderApi.class);
         DocumentApi documentApi = mStorage.getRetrofit().create(DocumentApi.class);
         ApiListHandlerTask<Folder> task;
@@ -142,6 +142,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         Bundle bundle = new Bundle();
         bundle.putInt(FOLDER_ID_BUNDLE_KEY, folderItemRecyclerAdapter.getFolderId(position));
         FolderViewFragment folderViewFragment = new FolderViewFragment();
+        ((ListActivity)getActivity()).setFolderList(folderViewFragment);
         folderViewFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment, folderViewFragment);
         fragmentTransaction.addToBackStack(null);

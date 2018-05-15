@@ -3,14 +3,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
         <android.support.v7.widget.RecyclerView
-            android:layout_marginTop="55dp"
+            android:layout_marginTop="60dp"
             android:id="@+id/folder_view_folder_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </android.support.v7.widget.RecyclerView>
-        <!--<android.support.v7.widget.RecyclerView-->
-            <!--android:id="@+id/folder_view_document_list"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content">-->
-        <!--</android.support.v7.widget.RecyclerView>-->
 </LinearLayout>

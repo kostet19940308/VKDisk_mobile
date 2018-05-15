@@ -26,39 +26,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.vkdisk.konstantin.vkdisk_mobile.fragments.DocumentLisFragment;
-import com.vkdisk.konstantin.vkdisk_mobile.fragments.FolderListFragment;
+import com.vkdisk.konstantin.vkdisk_mobile.fragments.ChatViewFragment;
 import com.vkdisk.konstantin.vkdisk_mobile.fragments.FolderViewFragment;
-import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
-import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
-import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ClickRecyclerAdapter;
-import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ItemRecyclerAdapter;
-import com.vkdisk.konstantin.vkdisk_mobile.retrofit.ChatApi;
-import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentRootApi;
-import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentRootFilterApi;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.Objects;
 
-import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-
-public class ListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Storage.DataSubscriber {
+public class ListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public final String LOG_TAG = this.getClass().getSimpleName();
-    private final static int LOAD_CHATS_TASK = 1;
-    private final static int LOAD_FILTERED_DOCS_TASK = 2;
     public static final String FOLDER_ID_BUNDLE_KEY = "folder_id";
 
-    Fragment folderList;
+    FolderViewFragment folderList;
+    ChatViewFragment chatList;
+    String fragmentName;
     Toolbar toolbar;
     private NavigationView navigationView;
     SharedPreferences pref;
@@ -173,7 +153,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     isNameReverse = !isNameReverse;
                 }
                 // в scheduler
-                loadData();
+//                loadData();
+                changeData();
             }
         });
         sortDateItem.setActionView(titleName);
@@ -197,7 +178,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     isDateReverse = !isDateReverse;
                 }
                 // в scheduler
-                loadData();
+//                loadData();
+                changeData();
             }
         });
         sortNameItem.setActionView(titleDate);
@@ -221,7 +203,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextSubmit(String query) {
                 Log.d(LOG_TAG, query);
                 filter = query;
-                loadData();
+//                loadData();
+                changeData();
                 return false;
             }
 
@@ -272,32 +255,31 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void loadData() {
-        if (Objects.equals(folderList.getTag(), getString(R.string.document_list))) {
+        if (Objects.equals(fragmentName, getString(R.string.document_list))) {
             // в scheduler
             loadFilterDocuments();
-        } else if (Objects.equals(folderList.getTag(), getString(R.string.chat_list))) {
+        } else if (Objects.equals(fragmentName, getString(R.string.chat_list))) {
             loadChats();
         }
     }
 
-    private void loadChats() {
-        // Эту всю херню надо убрать. Это просто говноглушка
+    private void changeData() {
+        if (Objects.equals(fragmentName, getString(R.string.document_list))) {
+            folderList.sendRequestForData();
+        } else if (Objects.equals(fragmentName, getString(R.string.chat_list))) {
+            chatList.sendRequestForData();
+        }
+    }
 
-        final ChatApi chatApi = mStorage.getRetrofit().create(ChatApi.class);
-        ApiHandlerTask<ResponseBody> task = new ApiHandlerTask<>(chatApi.getAllChats(
-                filter,
-                sort,
-                (isDateReverse || isNameReverse ? "reverse" : null)), LOAD_CHATS_TASK);
-        mStorage.addApiHandlerTask(task, this);
+    private void loadChats() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        chatList = new ChatViewFragment();
+        transaction.replace(R.id.fragment, chatList, getString(R.string.chat_list));
+        transaction.commit();
+        fragmentName = getString(R.string.chat_list);
     }
 
     private void loadFilterDocuments() {
-//        final DocumentRootFilterApi documentRootFilterApi = mStorage.getRetrofit().create(DocumentRootFilterApi.class);
-//        ApiHandlerTask<ResponseBody> task = new ApiHandlerTask<>(documentRootFilterApi.getAllFilterDocuments(
-//                filter,
-//                sort,
-//                (isDateReverse || isNameReverse ? "reverse" : null)), LOAD_FILTERED_DOCS_TASK);
-//        mStorage.addApiHandlerTask(task, this);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         folderList = new FolderViewFragment();
         Bundle bundle = new Bundle();
@@ -305,56 +287,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         folderList.setArguments(bundle);
         transaction.replace(R.id.fragment, folderList, getString(R.string.document_list));
         transaction.commit();
-    }
-
-    @Override
-    public void onDataLoaded(int type, com.vkdisk.konstantin.vkdisk_mobile.pipline.Response response) {
-        switch (type) {
-            case LOAD_CHATS_TASK:
-                try {
-                    com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<ResponseBody> castedResponse =
-                            (com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<ResponseBody>) response;
-                    Bundle bundle = new Bundle();
-                    // JSONObject надо пихать в базу данных и выгружать из нее во фрагменте
-                    bundle.putString("data", String.valueOf(new JSONObject(castedResponse.content.string())));
-                    FragmentManager fm = getSupportFragmentManager();
-                    // На самом деле я хз, на сколько это правильно так делать.
-                    // Но так фрагменты не накладываются друг на драга)
-                    fm.popBackStack();
-                    folderList = new FolderListFragment();
-                    folderList.setArguments(bundle);
-                    fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.chat_list)).commit();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case LOAD_FILTERED_DOCS_TASK:
-                try {
-                    com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<ResponseBody> castedResponse =
-                            (com.vkdisk.konstantin.vkdisk_mobile.pipline.Response<ResponseBody>) response;
-                    Bundle bundle = new Bundle();
-                    bundle.putString("data", String.valueOf(new JSONObject(castedResponse.content.string())));
-                    FragmentManager fm = getSupportFragmentManager();
-                    // На самом деле я хз, на сколько это правильно так делать.
-                    // Но так фрагменты не накладываются друг на драга)
-                    fm.popBackStack();
-                    folderList = new DocumentLisFragment();
-                    folderList.setArguments(bundle);
-                    fm.beginTransaction().replace(R.id.fragment, folderList, getString(R.string.document_list)).commit();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onDataLoadFailed() {
-
+        fragmentName = getString(R.string.document_list);
     }
 
     public String getSort() {
@@ -367,5 +300,13 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     public String getReverse() {
         return isDateReverse || isNameReverse ? "reverse" : null;
+    }
+
+    public void setFolderList(FolderViewFragment folderList) {
+        this.folderList = folderList;
+    }
+
+    public void setFragmentName(String fragmentName) {
+        this.fragmentName = fragmentName;
     }
 }
