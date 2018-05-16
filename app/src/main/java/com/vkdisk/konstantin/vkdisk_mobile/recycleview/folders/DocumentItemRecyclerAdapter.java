@@ -13,6 +13,7 @@ import com.vkdisk.konstantin.vkdisk_mobile.models.Folder;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ItemViewHolder;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,9 +61,15 @@ public class DocumentItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHo
         notifyDataSetChanged();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public void deleteCheckedFiles() {
-        mData = mData.stream().filter(s -> !s.getIsChecked()).collect(Collectors.toList());
+        ArrayList<Document> newData = new ArrayList<>();
+        for (Document item: mData) {
+            if (!item.getIsChecked()) {
+                newData.add(item);
+            }
+        }
+        mData = newData;
+//        mData = mData.stream().filter(s -> !s.getIsChecked()).collect(Collectors.toList());
         notifyDataSetChanged();
     }
 
@@ -80,9 +87,15 @@ public class DocumentItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHo
         notifyDataSetChanged();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public int getCheckedCount() {
-        return (int) mData.stream().filter(Document::getIsChecked).count();
+        int count = 0;
+        for (Document item: mData) {
+            if (item.getIsChecked()) {
+                ++count;
+            }
+        }
+        return count;
+//        return (int) mData.stream().filter(Document::getIsChecked).count();
     }
 
     @Override

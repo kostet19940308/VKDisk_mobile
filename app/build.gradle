@@ -6,8 +6,8 @@ android {
         applicationId "com.vkdisk.konstantin.vkdisk_mobile"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 201805162
+        versionName "2018.05.16v2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

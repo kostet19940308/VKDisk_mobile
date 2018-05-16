@@ -160,14 +160,12 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         super.onSaveInstanceState(outState);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onItemLongClick(View view, int position) {
         documentItemRecyclerAdapter.setChecked(position);
         ((ListActivity)getActivity()).setCheckCount(documentItemRecyclerAdapter.getCheckedCount());
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public void deleteFiles() {
         documentItemRecyclerAdapter.deleteCheckedFiles();
     }

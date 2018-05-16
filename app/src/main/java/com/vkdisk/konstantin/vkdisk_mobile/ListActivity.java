@@ -237,7 +237,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.equals(sortItem)) {
