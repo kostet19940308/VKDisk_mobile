@@ -207,6 +207,24 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         setSort();
 
         final SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnSearchClickListener(new SearchView.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sortItem.setVisible(false);
+                toggle.setDrawerIndicatorEnabled(false);
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        sortItem.setVisible(true);
+                        searchView.setIconified(true);
+                        searchView.setIconified(true);
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                        toggle.setDrawerIndicatorEnabled(true);
+                    }
+                });
+            }
+        });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -221,6 +239,15 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextChange(String newText) {
                 Log.d(LOG_TAG, newText);
                 return true;
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                sortItem.setVisible(true);
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                toggle.setDrawerIndicatorEnabled(true);
+                return false;
             }
         });
 
