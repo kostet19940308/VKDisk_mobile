@@ -3,6 +3,8 @@
     package="com.vkdisk.konstantin.vkdisk_mobile">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
     <application
         android:allowBackup="true"
@@ -23,6 +25,15 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".ListActivity"></activity>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.vkdisk.konstantin.vkdisk_mobile.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
     </application>
 
 </manifest>

@@ -82,6 +82,14 @@ public class DocumentItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHo
         notifyDataSetChanged();
     }
 
+    public String getVkUrl(int position) {
+        return mData.get(position).getVkUrl();
+    }
+
+    public String getTitle(int position) {
+        return mData.get(position).getTitle();
+    }
+
     public void setChecked(int position) {
         mData.get(position).setChecked();
         notifyDataSetChanged();

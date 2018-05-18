@@ -1,11 +1,17 @@
 package com.vkdisk.konstantin.vkdisk_mobile.fragments;
 
-import android.os.Build;
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,34 +19,40 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.vkdisk.konstantin.vkdisk_mobile.ListActivity;
 import com.vkdisk.konstantin.vkdisk_mobile.R;
 import com.vkdisk.konstantin.vkdisk_mobile.Storage;
+import com.vkdisk.konstantin.vkdisk_mobile.downloaders.LoadFile;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Folder;
-import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListResponse;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.Response;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickDocumentAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickFolderAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.DocumentItemRecyclerAdapter;
-import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.FolderItemRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentApi;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.FolderApi;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import su.j2e.rvjoiner.JoinableAdapter;
-import su.j2e.rvjoiner.JoinableLayout;
 import su.j2e.rvjoiner.RvJoiner;
+
+import static android.provider.Settings.AUTHORITY;
 
 public class FolderViewFragment extends Fragment implements Storage.DataSubscriber,
         ClickFolderAdapter.OnItemClickListener,
-        ClickDocumentAdapter.OnItemLongClickListener {
+        ClickDocumentAdapter.OnItemLongClickListener,
+        ClickDocumentAdapter.OnDocumentClickListener{
 
     private static final String LOGGER_KEY = FolderViewFragment.class.getSimpleName();
 
@@ -80,7 +92,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         folderItemRecyclerAdapter = new ClickFolderAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this);
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
-        documentItemRecyclerAdapter = new ClickDocumentAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this);
+        documentItemRecyclerAdapter = new ClickDocumentAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this, this);
         RecyclerView rv = (RecyclerView) view.findViewById(R.id.folder_view_folder_list);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         RvJoiner rvJoiner = new RvJoiner();
@@ -172,5 +184,99 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
     public void setUnChecked() {
         documentItemRecyclerAdapter.setUnChecked();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    @Override
+    public void onDocumentClick(View view, int position) {
+        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        new AsyncTask<String, Integer, File>() {
+            private Exception m_error = null;
+
+            @Override
+            protected void onPreExecute() {
+                progressDialog.setMessage("Downloading ...");
+                progressDialog.setCancelable(false);
+                progressDialog.setMax(100);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+
+                progressDialog.show();
+            }
+
+            @Override
+            protected File doInBackground(String... params) {
+                URL url;
+                HttpURLConnection urlConnection;
+                InputStream inputStream;
+                int totalSize;
+                int downloadedSize;
+                byte[] buffer;
+                int bufferLength;
+
+                File file = null;
+                FileOutputStream fos = null;
+
+                try {
+                    url = new URL(params[0]);
+                    urlConnection = (HttpURLConnection) url.openConnection();
+
+                    urlConnection.setRequestMethod("GET");
+                    urlConnection.setDoOutput(true);
+                    urlConnection.connect();
+                    final File[] appsDir = ContextCompat.getExternalFilesDirs(getActivity(), null);
+                    file = new File(ContextCompat.getExternalFilesDirs(getActivity(), null)[1], documentItemRecyclerAdapter.getTitle(position));
+                    fos = new FileOutputStream(file);
+                    inputStream = urlConnection.getInputStream();
+
+                    totalSize = urlConnection.getContentLength();
+                    downloadedSize = 0;
+
+                    buffer = new byte[1024];
+                    bufferLength = 0;
+
+                    // читаем со входа и пишем в выход,
+                    // с каждой итерацией публикуем прогресс
+                    while ((bufferLength = inputStream.read(buffer)) > 0) {
+                        fos.write(buffer, 0, bufferLength);
+                        downloadedSize += bufferLength;
+                        publishProgress(downloadedSize, totalSize);
+                    }
+
+                    fos.close();
+                    inputStream.close();
+
+                    return file;
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    m_error = e;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    m_error = e;
+                }
+
+                return null;
+            }
+            protected void onProgressUpdate(Integer... values) {
+                progressDialog
+                        .setProgress((int) ((values[0] / (float) values[1]) * 100));
+            };
+            @Override
+            protected void onPostExecute(File file) {
+                // отображаем сообщение, если возникла ошибка
+                if (m_error != null) {
+                    m_error.printStackTrace();
+                    return;
+                }
+                // закрываем прогресс и удаляем временный файл
+                progressDialog.hide();
+                Intent i = new Intent(android.content.Intent.ACTION_VIEW, FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, file));
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(i);
+            }
+
+        }.execute(documentItemRecyclerAdapter.getVkUrl(position));
+
+//            File dest = new File(getActivity().getApplicationContext().getFilesDir(), documentItemRecyclerAdapter.getTitle(position));
+//        new LoadFile(documentItemRecyclerAdapter.getVkUrl(position), dest).start();
     }
 }
