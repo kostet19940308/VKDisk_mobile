@@ -16,6 +16,7 @@ import com.vkdisk.konstantin.vkdisk_mobile.pipline.BaseHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.Response;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.ChatApi;
 
+import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.CookieStore;
@@ -30,8 +31,10 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -61,6 +64,7 @@ public class Storage implements ICallBackOnApiTaskFinished {
     private String basicUrl;
 
     private CookieManager cookieManager;
+    private String csrf;
     private CookieJar cookieJar;
     private Retrofit retrofit;
 
@@ -96,6 +100,18 @@ public class Storage implements ICallBackOnApiTaskFinished {
 //                .cookieJar(cookieJar)
                 .addNetworkInterceptor(interceptor)
                 .readTimeout(30, TimeUnit.SECONDS)
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(Chain chain) throws IOException {
+                        Request original = chain.request();
+
+                        Request.Builder requestBuilder = original.newBuilder()
+                                .header("X-CSRFToken", cookieManager.getCookieStore().get(URI.create(basicUrl)).get(0).getValue());
+
+                        Request request = requestBuilder.build();
+                        return chain.proceed(request);
+                    }
+                })
                 .build();
 
         retrofit = new Retrofit.Builder()

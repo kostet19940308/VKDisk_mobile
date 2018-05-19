@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.vkdisk.konstantin.vkdisk_mobile.fragments.ChatViewFragment;
@@ -58,6 +59,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     MenuItem cross;
     MenuItem checked;
     MenuItem trash;
+    MenuItem addItem;
     String sort;
     String filter;
     private Storage mStorage;
@@ -191,32 +193,30 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortNameItem.setActionView(titleDate);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_mail, menu);
-        searchItem = menu.findItem(R.id.action_search);
-        sortItem = menu.findItem(R.id.action_sort);
-        sortNameItem = menu.findItem(R.id.action_sort_name);
-        sortDateItem = menu.findItem(R.id.action_sort_date);
-        sortDateArrowItem = menu.findItem(R.id.action_sort_date_arrow);
-        sortNameArrowItem = menu.findItem(R.id.action_sort_name_arrow);
-        cross = menu.findItem(R.id.cross);
-        checked = menu.findItem(R.id.checked);
-        trash = menu.findItem(R.id.trash);
+    private void setAdd() {
+        final EditText editText = (EditText) addItem.getActionView();
+        editText.setOnClickListener(new EditText.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        setSort();
+            }
+        });
+    }
 
+    private void setFilter() {
         final SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setOnSearchClickListener(new SearchView.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sortItem.setVisible(false);
+                addItem.setVisible(false);
                 toggle.setDrawerIndicatorEnabled(false);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         sortItem.setVisible(true);
+                        addItem.setVisible(true);
                         searchView.setIconified(true);
                         searchView.setIconified(true);
                         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
@@ -245,11 +245,31 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public boolean onClose() {
                 sortItem.setVisible(true);
+                addItem.setVisible(true);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 toggle.setDrawerIndicatorEnabled(true);
                 return false;
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_mail, menu);
+        searchItem = menu.findItem(R.id.action_search);
+        sortItem = menu.findItem(R.id.action_sort);
+        sortNameItem = menu.findItem(R.id.action_sort_name);
+        sortDateItem = menu.findItem(R.id.action_sort_date);
+        sortDateArrowItem = menu.findItem(R.id.action_sort_date_arrow);
+        sortNameArrowItem = menu.findItem(R.id.action_sort_name_arrow);
+        cross = menu.findItem(R.id.cross);
+        checked = menu.findItem(R.id.checked);
+        trash = menu.findItem(R.id.trash);
+        addItem = menu.findItem(R.id.action_add);
+
+        setSort();
+        setFilter();
+
 
         sortNameItem.setVisible(false);
         sortDateItem.setVisible(false);
@@ -292,6 +312,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     private void setSortToolbar(boolean isSort) {
         searchItem.setVisible(!isSort);
+        addItem.setVisible(!isSort);
         sortNameItem.setVisible(isSort);
         sortDateItem.setVisible(isSort);
         sortNameArrowItem.setVisible(isSort);
@@ -363,6 +384,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortNameArrowItem.setVisible(false);
         searchItem.setVisible(this.checkCount == 0);
         sortItem.setVisible(this.checkCount == 0);
+        addItem.setVisible(this.checkCount == 0);
         cross.setVisible(this.checkCount != 0);
         checked.setVisible(this.checkCount != 0);
         trash.setVisible(this.checkCount != 0);

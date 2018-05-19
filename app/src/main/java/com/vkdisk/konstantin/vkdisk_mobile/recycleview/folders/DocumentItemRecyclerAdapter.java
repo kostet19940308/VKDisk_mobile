@@ -61,16 +61,20 @@ public class DocumentItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHo
         notifyDataSetChanged();
     }
 
-    public void deleteCheckedFiles() {
+    public ArrayList<Integer> deleteCheckedFiles() {
         ArrayList<Document> newData = new ArrayList<>();
+        ArrayList<Integer> docs = new ArrayList<>();
         for (Document item: mData) {
             if (!item.getIsChecked()) {
                 newData.add(item);
+            } else {
+                docs.add(item.getId());
             }
         }
         mData = newData;
 //        mData = mData.stream().filter(s -> !s.getIsChecked()).collect(Collectors.toList());
         notifyDataSetChanged();
+        return docs;
     }
 
     public void setUnChecked() {

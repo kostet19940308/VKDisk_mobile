@@ -35,6 +35,7 @@ import com.vkdisk.konstantin.vkdisk_mobile.pipline.Response;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickDocumentAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickFolderAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.DocumentItemRecyclerAdapter;
+import com.vkdisk.konstantin.vkdisk_mobile.requests.DocumentDeleteRequest;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentApi;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.FolderApi;
 
@@ -63,6 +64,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
     public static final int FOLDER_LOAD_TASK_KEY = 1;
     public static final int DOCUMENT_LOAD_TASK_KEY = 2;
+    public static final int DOCUMENTS_DELETE_TASK_KEY = 4;
 
     private int folderId;
     private Storage mStorage;
@@ -182,7 +184,11 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     }
 
     public void deleteFiles() {
-        documentItemRecyclerAdapter.deleteCheckedFiles();
+        ApiListHandlerTask<Document> docTask;
+        DocumentApi documentApi = mStorage.getRetrofit().create(DocumentApi.class);
+        ArrayList<Integer> docs = documentItemRecyclerAdapter.deleteCheckedFiles();
+        docTask = new ApiListHandlerTask<>(documentApi.deleteDocument(new DocumentDeleteRequest(docs)), DOCUMENTS_DELETE_TASK_KEY);
+        mStorage.addApiHandlerTask(docTask, this);
     }
 
     public void setUnChecked() {
