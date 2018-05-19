@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -190,7 +191,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     @Override
     public void onDocumentClick(View view, int position) {
         final ProgressDialog progressDialog = new ProgressDialog(getContext());
-        new AsyncTask<String, Integer, File>() {
+        AsyncTask<String, Integer, File> get = new AsyncTask<String, Integer, File>() {
             private Exception m_error = null;
 
             @Override
@@ -256,10 +257,14 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
                 return null;
             }
+
             protected void onProgressUpdate(Integer... values) {
                 progressDialog
                         .setProgress((int) ((values[0] / (float) values[1]) * 100));
-            };
+            }
+
+            ;
+
             @Override
             protected void onPostExecute(File file) {
                 // отображаем сообщение, если возникла ошибка
@@ -269,9 +274,21 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                 }
                 // закрываем прогресс и удаляем временный файл
                 progressDialog.hide();
-                Intent i = new Intent(android.content.Intent.ACTION_VIEW, FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, file));
-                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(i);
+//                Intent i = new Intent(Intent.ACTION_VIEW, FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, file));
+//                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+//                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//                Uri contentUri = FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, file);
+//                intent.setDataAndType(contentUri, "application/pdf");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    Uri contentUri = FileProvider.getUriForFile(getActivity().getApplicationContext(), "com.vkdisk.konstantin.vkdisk_mobile.fileprovider", file);
+                    intent.setDataAndType(contentUri, "application/pdf");
+                } else {
+                    intent.setDataAndType(Uri.fromFile(file), "application/pdf");
+                }
+                getActivity().getApplicationContext().startActivity(intent);
             }
 
         }.execute(documentItemRecyclerAdapter.getVkUrl(position));
