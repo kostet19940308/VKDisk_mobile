@@ -71,6 +71,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
     private ClickFolderAdapter folderItemRecyclerAdapter;
     private DocumentItemRecyclerAdapter documentItemRecyclerAdapter;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -127,6 +128,14 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         mStorage.addApiHandlerTask(task, this);
         mStorage.addApiHandlerTask(docTask, this);
 
+    }
+
+    @Override
+    public void onPause() {
+        if(progressDialog != null){
+            progressDialog.dismiss();
+        }
+        super.onPause();
     }
 
     @Override
@@ -198,7 +207,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onDocumentClick(View view, int position) {
-        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog = new ProgressDialog(getContext());
         AsyncTask<String, Integer, File> get = new AsyncTask<String, Integer, File>() {
             private Exception m_error = null;
 
@@ -234,6 +243,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                     urlConnection.connect();
                     final File[] appsDir = ContextCompat.getExternalFilesDirs(getActivity(), null);
                     file = new File(ContextCompat.getExternalFilesDirs(getActivity(), null)[1], documentItemRecyclerAdapter.getTitle(position));
+                    //file = new File(ContextCompat.getExternalFilesDirs(getActivity(), null)[0], documentItemRecyclerAdapter.getTitle(position));
                     fos = new FileOutputStream(file);
                     inputStream = urlConnection.getInputStream();
 
