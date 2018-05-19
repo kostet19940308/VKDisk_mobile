@@ -66,6 +66,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
     private ClickFolderAdapter folderItemRecyclerAdapter;
     private DocumentItemRecyclerAdapter documentItemRecyclerAdapter;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,6 +123,14 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         mStorage.addApiHandlerTask(task, this);
         mStorage.addApiHandlerTask(docTask, this);
 
+    }
+
+    @Override
+    public void onPause() {
+        if(progressDialog != null){
+            progressDialog.dismiss();
+        }
+        super.onPause();
     }
 
     @Override
@@ -189,7 +198,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onDocumentClick(View view, int position) {
-        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog = new ProgressDialog(getContext());
         new AsyncTask<String, Integer, File>() {
             private Exception m_error = null;
 
