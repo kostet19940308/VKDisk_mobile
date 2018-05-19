@@ -2,6 +2,7 @@ package com.vkdisk.konstantin.vkdisk_mobile.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.vkdisk.konstantin.vkdisk_mobile.ListActivity;
 import com.vkdisk.konstantin.vkdisk_mobile.R;
@@ -267,33 +269,31 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
             @Override
             protected void onPostExecute(File file) {
-                // отображаем сообщение, если возникла ошибка
                 if (m_error != null) {
                     m_error.printStackTrace();
                     return;
                 }
-                // закрываем прогресс и удаляем временный файл
                 progressDialog.hide();
-//                Intent i = new Intent(Intent.ACTION_VIEW, FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, file));
-//                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
-//                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//                Uri contentUri = FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, file);
-//                intent.setDataAndType(contentUri, "application/pdf");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     Uri contentUri = FileProvider.getUriForFile(getActivity().getApplicationContext(), "com.vkdisk.konstantin.vkdisk_mobile.fileprovider", file);
-                    intent.setDataAndType(contentUri, "application/pdf");
+                    intent.setData(contentUri);
                 } else {
-                    intent.setDataAndType(Uri.fromFile(file), "application/pdf");
+                    intent.setData(Uri.fromFile(file));
                 }
-                getActivity().getApplicationContext().startActivity(intent);
+                try {
+                    getActivity().getApplicationContext().startActivity(intent);
+                }
+                catch (ActivityNotFoundException a) {
+                    Toast toast = Toast.makeText(getActivity().getApplicationContext(),
+                            "No application to open file", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             }
 
         }.execute(documentItemRecyclerAdapter.getVkUrl(position));
-
-//            File dest = new File(getActivity().getApplicationContext().getFilesDir(), documentItemRecyclerAdapter.getTitle(position));
-//        new LoadFile(documentItemRecyclerAdapter.getVkUrl(position), dest).start();
     }
 }
