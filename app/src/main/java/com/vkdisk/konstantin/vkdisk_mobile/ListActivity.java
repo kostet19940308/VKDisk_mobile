@@ -230,7 +230,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                             break;
                     }
                     editText.setText("");
-                    hideInputMethod();
                 }
                 return false;
             }
@@ -362,7 +361,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             toggle.setDrawerIndicatorEnabled(false);
             actionKey = ACTION_FOLDER_CREATE_KEY;
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            showInputMethod();
             toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -370,7 +368,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                     toggle.setDrawerIndicatorEnabled(true);
                     folderList.setUnChecked();
-                    hideInputMethod();
                 }
             });
         } else if (item.equals(editItem)) {
@@ -412,6 +409,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         editText.setVisibility(isEdit ? View.VISIBLE: View.INVISIBLE);
         if (isEdit){
             editText.requestFocus();
+            showInputMethod();
+        } else {
+            hideInputMethod();
         }
 //        String toolbarText = null;
 //        switch (actionKey) {
