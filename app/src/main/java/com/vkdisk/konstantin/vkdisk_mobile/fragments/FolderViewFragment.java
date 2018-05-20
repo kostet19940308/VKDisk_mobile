@@ -60,7 +60,8 @@ import static android.provider.Settings.AUTHORITY;
 public class FolderViewFragment extends Fragment implements Storage.DataSubscriber,
         ClickFolderAdapter.OnItemClickListener,
         ClickDocumentAdapter.OnItemLongClickListener,
-        ClickDocumentAdapter.OnDocumentClickListener{
+        ClickDocumentAdapter.OnDocumentClickListener,
+        ClickFolderAdapter.OnFolderLongClickListener{
 
     private static final String LOGGER_KEY = FolderViewFragment.class.getSimpleName();
 
@@ -71,6 +72,8 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public static final int DOCUMENTS_DELETE_TASK_KEY = 4;
     public static final int FOLDER_CREATE_TASK_KEY = 5;
     public static final int DOCUMENT_UPDATE_TASK_KEY = 6;
+    public static final int FOLDER_UPDATE_TASK_KEY = 7;
+    public static final int FOLDER_DELETE_TASK_KEY = 8;
 
     private int folderId;
     private int updatePosition;
@@ -102,7 +105,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.folder_view_page, container, false);;
 
-        folderItemRecyclerAdapter = new ClickFolderAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this);
+        folderItemRecyclerAdapter = new ClickFolderAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this, this);
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
         documentItemRecyclerAdapter = new ClickDocumentAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this, this);
@@ -171,10 +174,17 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                     Response<Folder> castedResponse = (Response<Folder>) response;
                     folderItemRecyclerAdapter.createFolder(castedResponse.content);
                 });
+                break;
             case DOCUMENT_UPDATE_TASK_KEY:
                 getActivity().runOnUiThread(() -> {
                     Response<Document> castedResponse = (Response<Document>) response;
                     documentItemRecyclerAdapter.updateDocument(castedResponse.content, updatePosition);
+                });
+                break;
+            case FOLDER_UPDATE_TASK_KEY:
+                getActivity().runOnUiThread(() -> {
+                    Response<Folder> castedResponse = (Response<Folder>) response;
+                    folderItemRecyclerAdapter.updateFolder(castedResponse.content, updatePosition);
                 });
         }
     }
@@ -205,11 +215,28 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
 
     @Override
     public void onItemLongClick(View view, int position) {
-        documentItemRecyclerAdapter.setChecked(position);
-        ((ListActivity)getActivity()).setCheckCount(documentItemRecyclerAdapter.getCheckedCount());
-        ((ListActivity)getActivity()).setName(documentItemRecyclerAdapter.getTitle(position));
-        ((ListActivity)getActivity()).setId(documentItemRecyclerAdapter.getId(position));
-        updatePosition = position;
+        if (!((ListActivity)getActivity()).getIsFolderCheck()) {
+            ((ListActivity)getActivity()).setIsFolderCheck(false);
+            ((ListActivity)getActivity()).setIsDockCheck(true);
+            documentItemRecyclerAdapter.setChecked(position);
+            ((ListActivity) getActivity()).setCheckCount(documentItemRecyclerAdapter.getCheckedCount());
+            ((ListActivity) getActivity()).setName(documentItemRecyclerAdapter.getTitle(position));
+            ((ListActivity) getActivity()).setId(documentItemRecyclerAdapter.getId(position));
+            updatePosition = position;
+        }
+    }
+
+    @Override
+    public void onFolderLongClick(View view, int position) {
+        if (!((ListActivity)getActivity()).getIsDockCheck()) {
+            ((ListActivity)getActivity()).setIsFolderCheck(true);
+            ((ListActivity)getActivity()).setIsDockCheck(false);
+            folderItemRecyclerAdapter.setChecked(position);
+            ((ListActivity)getActivity()).setCheckCount(folderItemRecyclerAdapter.getCheckedCount());
+            ((ListActivity)getActivity()).setName(folderItemRecyclerAdapter.getTitle(position));
+            ((ListActivity)getActivity()).setId(folderItemRecyclerAdapter.getId(position));
+            updatePosition = position;
+        }
     }
 
     public void deleteFiles() {
@@ -218,6 +245,14 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         ArrayList<Integer> docs = documentItemRecyclerAdapter.deleteCheckedFiles();
         docTask = new ApiListHandlerTask<>(documentApi.deleteDocument(new DocumentDeleteRequest(docs)), DOCUMENTS_DELETE_TASK_KEY);
         mStorage.addApiHandlerTask(docTask, this);
+    }
+
+    public void deleteFolder(int id) {
+        ApiHandlerTask<Folder> task;
+        FolderApi folderApi = mStorage.getRetrofit().create(FolderApi.class);
+        folderItemRecyclerAdapter.deleteFolder(updatePosition);
+        task = new ApiHandlerTask<>(folderApi.deleteFolder(id), FOLDER_DELETE_TASK_KEY);
+        mStorage.addApiHandlerTask(task, this);
     }
 
     public void createFolder(String title) {
@@ -238,8 +273,16 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         mStorage.addApiHandlerTask(doctask, this);
     }
 
+    public void updateFolder(String title, int id) {
+        ApiHandlerTask<Folder> task;
+        FolderApi folderApi = mStorage.getRetrofit().create(FolderApi.class);
+        task = new ApiHandlerTask<>(folderApi.updateFolder(new UpdateOrCreateRequest(title), id), FOLDER_UPDATE_TASK_KEY);
+        mStorage.addApiHandlerTask(task, this);
+    }
+
     public void setUnChecked() {
         documentItemRecyclerAdapter.setUnChecked();
+        folderItemRecyclerAdapter.setUnChecked();
     }
 
     @SuppressLint("StaticFieldLeak")

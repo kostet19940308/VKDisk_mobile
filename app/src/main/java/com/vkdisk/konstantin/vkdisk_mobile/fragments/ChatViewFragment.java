@@ -33,7 +33,7 @@ import static com.vkdisk.konstantin.vkdisk_mobile.fragments.FolderViewFragment.F
  */
 
 public class ChatViewFragment extends Fragment implements Storage.DataSubscriber,
-        ClickFolderAdapter.OnItemClickListener, ClickFolderAdapter.OnItemLongClickListener {
+        ClickFolderAdapter.OnItemClickListener, ClickFolderAdapter.OnFolderLongClickListener {
 
     public static final int CHAT_LOAD_TASK_KEY = 3;
     private Storage mStorage;
@@ -56,7 +56,7 @@ public class ChatViewFragment extends Fragment implements Storage.DataSubscriber
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.folder_view_page, container, false);
-        folderItemRecyclerAdapter = new ClickFolderAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this);
+        folderItemRecyclerAdapter = new ClickFolderAdapter(getActivity().getLayoutInflater(), new ArrayList<>(), this, this);
         RecyclerView.ItemDecoration itemDecoration = new
                 DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.folder_view_folder_list);
@@ -116,8 +116,9 @@ public class ChatViewFragment extends Fragment implements Storage.DataSubscriber
         super.onDestroy();
     }
 
+
     @Override
-    public void onItemLongClick(View view, int position) {
+    public void onFolderLongClick(View view, int position) {
 
     }
 }

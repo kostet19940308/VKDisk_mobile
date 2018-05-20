@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.vkdisk.konstantin.vkdisk_mobile.R;
+import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Folder;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.ItemViewHolder;
 
@@ -46,9 +47,11 @@ public class FolderItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHold
         Folder folder = mData.get(position);
         holder.setText(folder.getTitle());
         holder.setIcon("folder");
-//        if (folder.getIsChecked()) {
-//            holder.itemView.setBackgroundColor(Color.CYAN);
-//        }
+        if (folder.getIsChecked()) {
+            holder.itemView.setBackgroundColor(Color.LTGRAY);
+        } else {
+            holder.itemView.setBackgroundColor(Color.WHITE);
+        }
     }
 
     @Override
@@ -65,13 +68,52 @@ public class FolderItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHold
         return mData.get(position).getId();
     }
 
-    public void setChecked(int position) {
-        mData.get(position).setChecked();
-    }
-
     public void createFolder(Folder folder) {
         mData.add(folder);
 //        notifyItemInserted(mData.size() - 1);
         notifyDataSetChanged();
     }
+
+    public int getId(int position) {
+        return mData.get(position).getId();
+    }
+
+    public String getTitle(int position) {
+        return mData.get(position).getTitle();
+    }
+
+    public void setChecked(int position) {
+        mData.get(position).setChecked();
+        notifyDataSetChanged();
+    }
+
+    public int getCheckedCount() {
+        int count = 0;
+        for (Folder item: mData) {
+            if (item.getIsChecked()) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    public void setUnChecked() {
+        for (Folder document:mData) {
+            if (document.getIsChecked()) {
+                document.setChecked();
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void updateFolder(Folder content, int updatePosition) {
+        mData.set(updatePosition, content);
+        notifyItemChanged(updatePosition);
+    }
+
+    public void deleteFolder(int position) {
+        mData.remove(position);
+        notifyItemRemoved(position);
+    }
 }
+

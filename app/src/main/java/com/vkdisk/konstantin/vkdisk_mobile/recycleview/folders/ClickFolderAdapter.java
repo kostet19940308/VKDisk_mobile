@@ -32,6 +32,8 @@ public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements Vie
 
     @Override
     public boolean onLongClick(View view) {
+        Integer position = (Integer)view.getTag();
+        onFolderLongClickListener.onFolderLongClick(view, position);
         return false;
     }
 
@@ -41,7 +43,7 @@ public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements Vie
     }
 
     public interface OnFolderLongClickListener {
-        void onItemLongClick(View view, int position);
+        void onFolderLongClick(View view, int position);
     }
 
     private final OnItemClickListener mClickListener;
@@ -51,6 +53,7 @@ public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements Vie
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ItemViewHolder holder = super.onCreateViewHolder(parent, viewType);
         holder.itemView.setOnClickListener(this);
+        holder.itemView.setOnLongClickListener(this);
 
         return holder;
     }

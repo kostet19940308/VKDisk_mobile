@@ -10,9 +10,11 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface FolderApi {
@@ -22,12 +24,15 @@ public interface FolderApi {
     @GET("/api/v1/folders/?large&transfer")
     Call<ApiListResponse<Folder>> getRootFolders();
 
-    @PUT("/api/v1/folders/{folderId}/")
-    Call<Folder> updateFolder(@Body UpdateOrCreateRequest body);
+    @PUT("/api/v1/folders/{id}/")
+    Call<Folder> updateFolder(@Body UpdateOrCreateRequest body, @Path("id") int id);
 
     @POST("/api/v1/folders/?root")
     Call<Folder> createFolderRoot(@Body UpdateOrCreateRequest body);
 
     @POST("/api/v1/folders/")
     Call<Folder> createFolder(@Body UpdateOrCreateRequest body, @Query("folder") int folderId);
+
+    @DELETE("/api/v1/folders/{id}/")
+    Call<Folder> deleteFolder(@Path("id") int id);
 }

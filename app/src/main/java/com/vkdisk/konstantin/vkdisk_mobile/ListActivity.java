@@ -57,6 +57,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     private boolean isNameSort = true;
     private boolean isNameReverse = false;
     private boolean isDateReverse = false;
+    private boolean isDocCheck = false;
+    private boolean isFolderCheck = false;
     private String name;
     private int id;
     MenuItem sortItem;
@@ -211,8 +213,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (i == 66) {
                     setEditToolbar(false);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    toggle.setDrawerIndicatorEnabled(false);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    toggle.setDrawerIndicatorEnabled(true);
                     switch (actionKey) {
                         case ACTION_DOCUMENT_UPDATE_KEY:
                             folderList.updateDocument(editText.getText().toString(), id);
@@ -222,6 +224,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                             folderList.createFolder(editText.getText().toString());
                             break;
                         case ACTION_FOLDER_UPDATE_KEY:
+                            folderList.updateFolder(editText.getText().toString(), id);
+                            folderList.setUnChecked();
                             break;
                     }
                     editText.setText("");
@@ -338,8 +342,14 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         } else if (toggle.onOptionsItemSelected(item)) {
             return true;
         } else if (item.equals(trash) && Objects.equals(fragmentName, getString(R.string.document_list))) {
-            folderList.deleteFiles();
+            if (isDocCheck) {
+                folderList.deleteFiles();
+            } else if (isFolderCheck) {
+                folderList.deleteFolder(id);
+            }
             setCheckCount(0);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            toggle.setDrawerIndicatorEnabled(true);
         } else if (item.equals(cross) && Objects.equals(fragmentName, getString(R.string.document_list))) {
             folderList.setUnChecked();
             setCheckCount(0);
@@ -354,6 +364,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     setEditToolbar(false);
                     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                     toggle.setDrawerIndicatorEnabled(true);
+                    folderList.setUnChecked();
                 }
             });
         } else if (item.equals(editItem)) {
@@ -487,11 +498,40 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         addItem.setVisible(this.checkCount == 0);
         cross.setVisible(this.checkCount != 0);
         checked.setVisible(this.checkCount != 0);
-        trash.setVisible(this.checkCount != 0);
-        checked.setTitle(String.format("CHECKED %s FILES", this.checkCount));
         getSupportActionBar().setDisplayShowTitleEnabled(this.checkCount == 0);
-        if (this.checkCount == 1) {
-            actionKey = ACTION_DOCUMENT_UPDATE_KEY;
+        if (isDocCheck) {
+            checked.setTitle(String.format("CHECKED %s FILES", this.checkCount));
+            trash.setVisible(this.checkCount != 0);
+        } else if (isFolderCheck) {
+            checked.setTitle(String.format("CHECKED %s FOLDERS", this.checkCount));
         }
+        if (checkCount == 0) {
+            isDocCheck = false;
+            isFolderCheck = false;
+        }
+        if (this.checkCount == 1) {
+            if (isDocCheck) {
+                actionKey = ACTION_DOCUMENT_UPDATE_KEY;
+            } else if (isFolderCheck) {
+                trash.setVisible(this.checkCount != 0);
+                actionKey = ACTION_FOLDER_UPDATE_KEY;
+            }
+        }
+    }
+
+    public void setIsDockCheck(boolean isDocCheck) {
+        this.isDocCheck = isDocCheck;
+    }
+
+    public boolean getIsDockCheck() {
+        return isDocCheck;
+    }
+
+    public void setIsFolderCheck(boolean isFolderCheck) {
+        this.isFolderCheck = isFolderCheck;
+    }
+
+    public boolean getIsFolderCheck() {
+        return isFolderCheck;
     }
 }
