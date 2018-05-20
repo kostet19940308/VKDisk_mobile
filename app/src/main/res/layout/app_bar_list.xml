@@ -18,7 +18,16 @@
             android:layout_height="?attr/actionBarSize"
             android:id="@+id/toolbar"
             style="@style/ToolbarTheme"
-            />
+            >
+            <EditText
+                android:layout_width="95dp"
+                android:layout_height="30dp"
+                android:id="@+id/editText"
+                android:background="@color/colorPrimary"
+                android:inputType="textLongMessage"
+                android:hint="@string/enter_name"
+                />
+        </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_list"

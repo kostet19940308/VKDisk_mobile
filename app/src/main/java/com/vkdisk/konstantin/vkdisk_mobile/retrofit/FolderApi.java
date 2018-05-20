@@ -3,6 +3,7 @@ package com.vkdisk.konstantin.vkdisk_mobile.retrofit;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Folder;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListResponse;
+import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiRetrieveResponse;
 import com.vkdisk.konstantin.vkdisk_mobile.requests.UpdateOrCreateRequest;
 
 import java.util.List;
@@ -22,8 +23,11 @@ public interface FolderApi {
     Call<ApiListResponse<Folder>> getRootFolders();
 
     @PUT("/api/v1/folders/{folderId}/")
-    Call<ApiListResponse<Document>> updateFolder(@Body UpdateOrCreateRequest body);
+    Call<ApiRetrieveResponse> updateFolder(@Body UpdateOrCreateRequest body);
+
+    @POST("/api/v1/folders/?root")
+    Call<ApiRetrieveResponse> createFolderRoot(@Body UpdateOrCreateRequest body);
 
     @POST("/api/v1/folders/")
-    Call<ApiListResponse<Document>> createFolder(@Body UpdateOrCreateRequest body);
+    Call<ApiRetrieveResponse> createFolder(@Body UpdateOrCreateRequest body, @Query("folder") int folderId);
 }

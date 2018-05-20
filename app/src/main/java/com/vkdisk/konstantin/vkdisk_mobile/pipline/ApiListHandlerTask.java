@@ -6,12 +6,12 @@ import retrofit2.Call;
 
 public class ApiListHandlerTask<T> extends ApiHandlerTask<ApiListResponse<T>> {
 
-    public ApiListHandlerTask(Call<ApiListResponse<T>> call, int actionCode) {
+public ApiListHandlerTask(Call<ApiListResponse<T>> call, int actionCode) {
         super(call, actionCode);
-    }
+        }
 
-    @Override
-    public Response<ApiListResponse<T>> makeResponse(ApiListResponse<T> content) {
+@Override
+public Response<ApiListResponse<T>> makeResponse(ApiListResponse<T> content) {
         return super.makeResponse(content);
-    }
-}
+        }
+        }

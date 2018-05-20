@@ -105,8 +105,15 @@ public class Storage implements ICallBackOnApiTaskFinished {
                     public okhttp3.Response intercept(Chain chain) throws IOException {
                         Request original = chain.request();
 
+                        String token = null;
+                        for (HttpCookie cookie : cookieManager.getCookieStore().get(URI.create(basicUrl))) {
+                            if (cookie.getName().equals("csrftoken")) {
+                                token = cookie.getValue();
+                                break;
+                            }
+                        }
                         Request.Builder requestBuilder = original.newBuilder()
-                                .header("X-CSRFToken", cookieManager.getCookieStore().get(URI.create(basicUrl)).get(0).getValue());
+                                .header("X-CSRFToken", token);
 
                         Request request = requestBuilder.build();
                         return chain.proceed(request);

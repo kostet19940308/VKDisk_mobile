@@ -3,6 +3,7 @@ package com.vkdisk.konstantin.vkdisk_mobile;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -23,9 +24,11 @@ import android.support.design.widget.NavigationView;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -38,6 +41,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     public final String LOG_TAG = this.getClass().getSimpleName();
     public static final String FOLDER_ID_BUNDLE_KEY = "folder_id";
+
+    public static final int ACTION_FOLDER_CREATE_KEY = 10;
+    public static final int ACTION_FOLDER_UPDATE_KEY = 11;
+    public static final int ACTION_DOCUMENT_UPDATE_KEY = 12;
 
     FolderViewFragment folderList;
     ChatViewFragment chatList;
@@ -60,10 +67,13 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     MenuItem checked;
     MenuItem trash;
     MenuItem addItem;
+    MenuItem addTextItem;
     String sort;
     String filter;
+    EditText editText;
     private Storage mStorage;
     private int checkCount;
+    private int actionKey = ACTION_FOLDER_CREATE_KEY;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -194,11 +204,23 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setAdd() {
-        final EditText editText = (EditText) addItem.getActionView();
-        editText.setOnClickListener(new EditText.OnClickListener() {
+        editText.setOnKeyListener(new EditText.OnKeyListener() {
             @Override
-            public void onClick(View view) {
-
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if (i == 66) {
+                    setEditToolbar(false);
+                    switch (actionKey) {
+                        case ACTION_DOCUMENT_UPDATE_KEY:
+                            break;
+                        case ACTION_FOLDER_CREATE_KEY:
+                            folderList.createFolder(editText.getText().toString());
+                            break;
+                        case ACTION_FOLDER_UPDATE_KEY:
+                            break;
+                    }
+                    editText.setText("");
+                }
+                return false;
             }
         });
     }
@@ -253,6 +275,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_mail, menu);
@@ -266,9 +290,11 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         checked = menu.findItem(R.id.checked);
         trash = menu.findItem(R.id.trash);
         addItem = menu.findItem(R.id.action_add);
+        editText = (EditText) findViewById(R.id.editText);
 
         setSort();
         setFilter();
+        setAdd();
 
 
         sortNameItem.setVisible(false);
@@ -278,6 +304,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         cross.setVisible(false);
         checked.setVisible(false);
         trash.setVisible(false);
+        editText.setVisibility(View.INVISIBLE);
         // Тут надо добавить если выделяется хотя бы один файл, появляется возможность удалить их,
         // Переименовать, если выделен только один файл, в перспективе переместить в папку
         // Изменящиеся хрени в toolbar надо сунуть в menu_main
@@ -306,6 +333,19 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         } else if (item.equals(cross) && Objects.equals(fragmentName, getString(R.string.document_list))) {
             folderList.setUnChecked();
             setCheckCount(0);
+        } else if (item.equals(addItem)) {
+            setEditToolbar(true);
+            toggle.setDrawerIndicatorEnabled(false);
+            actionKey = ACTION_FOLDER_CREATE_KEY;
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setEditToolbar(false);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    toggle.setDrawerIndicatorEnabled(true);
+                }
+            });
         }
         return super.onOptionsItemSelected(item);
     }
@@ -318,6 +358,28 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortNameArrowItem.setVisible(isSort);
         sortDateArrowItem.setVisible(isSort);
         getSupportActionBar().setDisplayShowTitleEnabled(!isSort);
+    }
+
+    private void setEditToolbar(boolean isEdit) {
+        searchItem.setVisible(!isEdit);
+        addItem.setVisible(!isEdit);
+        sortItem.setVisible(!isEdit);
+        editText.setVisibility(isEdit ? View.VISIBLE: View.INVISIBLE);
+        if (isEdit){
+            editText.requestFocus();
+        }
+        String toolbarText = null;
+        switch (actionKey) {
+            case ACTION_FOLDER_CREATE_KEY:
+                toolbarText = "Create folder";
+                break;
+            case ACTION_FOLDER_UPDATE_KEY:
+                toolbarText = "Update folder";
+                break;
+            case ACTION_DOCUMENT_UPDATE_KEY:
+                toolbarText = "Update document";
+        }
+        getSupportActionBar().setTitle(isEdit ? toolbarText : "VK DISK");
     }
 
     private void loadData() {

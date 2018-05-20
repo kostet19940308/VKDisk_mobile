@@ -68,4 +68,10 @@ public class FolderItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHold
     public void setChecked(int position) {
         mData.get(position).setChecked();
     }
+
+    public void createFolder(Folder folder) {
+        mData.add(folder);
+//        notifyItemInserted(mData.size() - 1);
+        notifyDataSetChanged();
+    }
 }

@@ -29,13 +29,17 @@ import com.vkdisk.konstantin.vkdisk_mobile.Storage;
 import com.vkdisk.konstantin.vkdisk_mobile.downloaders.LoadFile;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Document;
 import com.vkdisk.konstantin.vkdisk_mobile.models.Folder;
+import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListHandlerTask;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiListResponse;
+import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiRetrieveHandlerTask;
+import com.vkdisk.konstantin.vkdisk_mobile.pipline.ApiRetrieveResponse;
 import com.vkdisk.konstantin.vkdisk_mobile.pipline.Response;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickDocumentAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.ClickFolderAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.recycleview.folders.DocumentItemRecyclerAdapter;
 import com.vkdisk.konstantin.vkdisk_mobile.requests.DocumentDeleteRequest;
+import com.vkdisk.konstantin.vkdisk_mobile.requests.UpdateOrCreateRequest;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.DocumentApi;
 import com.vkdisk.konstantin.vkdisk_mobile.retrofit.FolderApi;
 
@@ -65,6 +69,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public static final int FOLDER_LOAD_TASK_KEY = 1;
     public static final int DOCUMENT_LOAD_TASK_KEY = 2;
     public static final int DOCUMENTS_DELETE_TASK_KEY = 4;
+    public static final int FOLDER_CREATE_TASK_KEY = 5;
 
     private int folderId;
     private Storage mStorage;
@@ -159,6 +164,11 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                     documentItemRecyclerAdapter.setNewData(castedResponse.content.getResults());
                 });
                 break;
+            case FOLDER_CREATE_TASK_KEY:
+                getActivity().runOnUiThread(() -> {
+                    Response<ApiRetrieveResponse> castedResponse = (Response<ApiRetrieveResponse>) response;
+                    folderItemRecyclerAdapter.createFolder((Folder) castedResponse.content);
+                });
         }
     }
 
@@ -198,6 +208,13 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         ArrayList<Integer> docs = documentItemRecyclerAdapter.deleteCheckedFiles();
         docTask = new ApiListHandlerTask<>(documentApi.deleteDocument(new DocumentDeleteRequest(docs)), DOCUMENTS_DELETE_TASK_KEY);
         mStorage.addApiHandlerTask(docTask, this);
+    }
+
+    public void createFolder(String title) {
+        ApiRetrieveHandlerTask task;
+        FolderApi folderApi = mStorage.getRetrofit().create(FolderApi.class);
+        task = new ApiRetrieveHandlerTask(folderApi.createFolderRoot(new UpdateOrCreateRequest(title)), FOLDER_CREATE_TASK_KEY);
+        mStorage.addApiHandlerTask(task, this);
     }
 
     public void setUnChecked() {
