@@ -166,8 +166,8 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                 break;
             case FOLDER_CREATE_TASK_KEY:
                 getActivity().runOnUiThread(() -> {
-                    Response<ApiRetrieveResponse> castedResponse = (Response<ApiRetrieveResponse>) response;
-                    folderItemRecyclerAdapter.createFolder((Folder) castedResponse.content);
+                    Response<Folder> castedResponse = (Response<Folder>) response;
+                    folderItemRecyclerAdapter.createFolder(castedResponse.content);
                 });
         }
     }
@@ -211,9 +211,9 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     }
 
     public void createFolder(String title) {
-        ApiRetrieveHandlerTask task;
+        ApiHandlerTask<Folder> task;
         FolderApi folderApi = mStorage.getRetrofit().create(FolderApi.class);
-        task = new ApiRetrieveHandlerTask(folderApi.createFolderRoot(new UpdateOrCreateRequest(title)), FOLDER_CREATE_TASK_KEY);
+        task = new ApiHandlerTask<>(folderApi.createFolderRoot(new UpdateOrCreateRequest(title)), FOLDER_CREATE_TASK_KEY);
         mStorage.addApiHandlerTask(task, this);
     }
 

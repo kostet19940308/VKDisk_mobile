@@ -23,11 +23,11 @@ public interface FolderApi {
     Call<ApiListResponse<Folder>> getRootFolders();
 
     @PUT("/api/v1/folders/{folderId}/")
-    Call<ApiRetrieveResponse> updateFolder(@Body UpdateOrCreateRequest body);
+    Call<Folder> updateFolder(@Body UpdateOrCreateRequest body);
 
     @POST("/api/v1/folders/?root")
-    Call<ApiRetrieveResponse> createFolderRoot(@Body UpdateOrCreateRequest body);
+    Call<Folder> createFolderRoot(@Body UpdateOrCreateRequest body);
 
     @POST("/api/v1/folders/")
-    Call<ApiRetrieveResponse> createFolder(@Body UpdateOrCreateRequest body, @Query("folder") int folderId);
+    Call<Folder> createFolder(@Body UpdateOrCreateRequest body, @Query("folder") int folderId);
 }
