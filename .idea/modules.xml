@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/VKDisk_mobile.iml" filepath="$PROJECT_DIR$/VKDisk_mobile.iml" />
-      <module fileurl="file://C:\Users\Konstantin\AndroidStudioProjects\VKDisk_mobile\.idea\modules\VKDisk_mobile.iml" filepath="C:\Users\Konstantin\AndroidStudioProjects\VKDisk_mobile\.idea\modules\VKDisk_mobile.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
