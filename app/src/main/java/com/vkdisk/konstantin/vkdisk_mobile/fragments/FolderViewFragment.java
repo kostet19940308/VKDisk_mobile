@@ -213,7 +213,11 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public void createFolder(String title) {
         ApiHandlerTask<Folder> task;
         FolderApi folderApi = mStorage.getRetrofit().create(FolderApi.class);
-        task = new ApiHandlerTask<>(folderApi.createFolderRoot(new UpdateOrCreateRequest(title)), FOLDER_CREATE_TASK_KEY);
+        if (folderId > 0) {
+            task = new ApiHandlerTask<>(folderApi.createFolder(new UpdateOrCreateRequest(title), folderId), FOLDER_CREATE_TASK_KEY);
+        } else {
+            task = new ApiHandlerTask<>(folderApi.createFolderRoot(new UpdateOrCreateRequest(title)), FOLDER_CREATE_TASK_KEY);
+        }
         mStorage.addApiHandlerTask(task, this);
     }
 

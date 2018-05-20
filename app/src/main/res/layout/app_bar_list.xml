@@ -26,6 +26,7 @@
                 android:background="@color/colorPrimary"
                 android:inputType="textLongMessage"
                 android:hint="@string/enter_name"
+                android:textColorHint="#ffffff"
                 />
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>

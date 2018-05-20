@@ -209,6 +209,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (i == 66) {
                     setEditToolbar(false);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    toggle.setDrawerIndicatorEnabled(true);
                     switch (actionKey) {
                         case ACTION_DOCUMENT_UPDATE_KEY:
                             break;
@@ -374,10 +376,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 toolbarText = "Create folder";
                 break;
             case ACTION_FOLDER_UPDATE_KEY:
-                toolbarText = "Update folder";
+                toolbarText = "UPDATE FOLDER";
                 break;
             case ACTION_DOCUMENT_UPDATE_KEY:
-                toolbarText = "Update document";
+                toolbarText = "UPDATE DOCUMENT";
         }
         getSupportActionBar().setTitle(isEdit ? toolbarText : "VK DISK");
     }
