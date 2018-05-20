@@ -18,12 +18,21 @@ import java.util.List;
  * Created by nagai on 13.05.2018.
  */
 
-public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements View.OnClickListener{
+public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements View.OnClickListener, View.OnLongClickListener{
 
+    private final OnFolderLongClickListener onFolderLongClickListener;
 
-    public ClickFolderAdapter(LayoutInflater inflater, List<Folder> data, ClickFolderAdapter.OnItemClickListener mClickListener) {
+    public ClickFolderAdapter(LayoutInflater inflater, List<Folder> data,
+                              ClickFolderAdapter.OnItemClickListener mClickListener,
+                              ClickFolderAdapter.OnFolderLongClickListener onFolderLongClickListener) {
         super(inflater, data);
         this.mClickListener = mClickListener;
+        this.onFolderLongClickListener = onFolderLongClickListener;
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        return false;
     }
 
 
@@ -31,7 +40,7 @@ public class ClickFolderAdapter extends FolderItemRecyclerAdapter implements Vie
         void onItemClick(View view, int position);
     }
 
-    public interface OnItemLongClickListener {
+    public interface OnFolderLongClickListener {
         void onItemLongClick(View view, int position);
     }
 

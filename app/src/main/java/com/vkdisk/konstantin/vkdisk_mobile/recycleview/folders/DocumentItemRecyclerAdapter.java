@@ -119,4 +119,13 @@ public class DocumentItemRecyclerAdapter extends RecyclerView.Adapter<ItemViewHo
     public long getItemId(int position) {
         return position;
     }
+
+    public int getId(int position) {
+        return mData.get(position).getId();
+    }
+
+    public void updateDocument(Document content, int updatePosition) {
+        mData.set(updatePosition, content);
+        notifyItemChanged(updatePosition);
+    }
 }

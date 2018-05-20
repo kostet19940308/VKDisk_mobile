@@ -57,6 +57,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     private boolean isNameSort = true;
     private boolean isNameReverse = false;
     private boolean isDateReverse = false;
+    private String name;
+    private int id;
     MenuItem sortItem;
     MenuItem searchItem;
     MenuItem sortNameItem;
@@ -67,7 +69,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     MenuItem checked;
     MenuItem trash;
     MenuItem addItem;
-    MenuItem addTextItem;
+    MenuItem editItem;
     String sort;
     String filter;
     EditText editText;
@@ -209,10 +211,12 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (i == 66) {
                     setEditToolbar(false);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                    toggle.setDrawerIndicatorEnabled(true);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    toggle.setDrawerIndicatorEnabled(false);
                     switch (actionKey) {
                         case ACTION_DOCUMENT_UPDATE_KEY:
+                            folderList.updateDocument(editText.getText().toString(), id);
+                            folderList.setUnChecked();
                             break;
                         case ACTION_FOLDER_CREATE_KEY:
                             folderList.createFolder(editText.getText().toString());
@@ -272,6 +276,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 addItem.setVisible(true);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 toggle.setDrawerIndicatorEnabled(true);
+                filter = "";
+                changeData();
                 return false;
             }
         });
@@ -293,6 +299,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         trash = menu.findItem(R.id.trash);
         addItem = menu.findItem(R.id.action_add);
         editText = (EditText) findViewById(R.id.editText);
+        editItem = menu.findItem(R.id.edit);
 
         setSort();
         setFilter();
@@ -303,6 +310,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortDateItem.setVisible(false);
         sortDateArrowItem.setVisible(false);
         sortNameArrowItem.setVisible(false);
+        editItem.setVisible(false);
         cross.setVisible(false);
         checked.setVisible(false);
         trash.setVisible(false);
@@ -348,6 +356,24 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     toggle.setDrawerIndicatorEnabled(true);
                 }
             });
+        } else if (item.equals(editItem)) {
+            setEditToolbar(true);
+            toggle.setDrawerIndicatorEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            checked.setVisible(false);
+            cross.setVisible(false);
+            trash.setVisible(false);
+            editItem.setVisible(false);
+            editText.setText(name);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setEditToolbar(false);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    toggle.setDrawerIndicatorEnabled(true);
+                }
+            });
         }
         return super.onOptionsItemSelected(item);
     }
@@ -370,18 +396,19 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         if (isEdit){
             editText.requestFocus();
         }
-        String toolbarText = null;
-        switch (actionKey) {
-            case ACTION_FOLDER_CREATE_KEY:
-                toolbarText = "Create folder";
-                break;
-            case ACTION_FOLDER_UPDATE_KEY:
-                toolbarText = "UPDATE FOLDER";
-                break;
-            case ACTION_DOCUMENT_UPDATE_KEY:
-                toolbarText = "UPDATE DOCUMENT";
-        }
-        getSupportActionBar().setTitle(isEdit ? toolbarText : "VK DISK");
+//        String toolbarText = null;
+//        switch (actionKey) {
+//            case ACTION_FOLDER_CREATE_KEY:
+//                toolbarText = "Create folder";
+//                break;
+//            case ACTION_FOLDER_UPDATE_KEY:
+//                toolbarText = "UPDATE FOLDER";
+//                break;
+//            case ACTION_DOCUMENT_UPDATE_KEY:
+//                toolbarText = "UPDATE DOCUMENT";
+//        }
+//        getSupportActionBar().setTitle(isEdit ? toolbarText : "VK DISK");
+        getSupportActionBar().setDisplayShowTitleEnabled(!isEdit);
     }
 
     private void loadData() {
@@ -436,6 +463,14 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         this.folderList = folderList;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setFragmentName(String fragmentName) {
         this.fragmentName = fragmentName;
     }
@@ -446,6 +481,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         sortDateItem.setVisible(false);
         sortDateArrowItem.setVisible(false);
         sortNameArrowItem.setVisible(false);
+        editItem.setVisible(this.checkCount == 1);
         searchItem.setVisible(this.checkCount == 0);
         sortItem.setVisible(this.checkCount == 0);
         addItem.setVisible(this.checkCount == 0);
@@ -454,5 +490,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         trash.setVisible(this.checkCount != 0);
         checked.setTitle(String.format("CHECKED %s FILES", this.checkCount));
         getSupportActionBar().setDisplayShowTitleEnabled(this.checkCount == 0);
+        if (this.checkCount == 1) {
+            actionKey = ACTION_DOCUMENT_UPDATE_KEY;
+        }
     }
 }

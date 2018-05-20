@@ -39,6 +39,12 @@
         android:icon="@drawable/sort"
         android:title="@string/name"/>
     <item
+        android:id="@+id/edit"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/edit"
+        android:title="@string/checked"/>
+    <item
         android:id="@+id/trash"
         android:orderInCategory="100"
         app:showAsAction="always"

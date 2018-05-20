@@ -70,8 +70,10 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public static final int DOCUMENT_LOAD_TASK_KEY = 2;
     public static final int DOCUMENTS_DELETE_TASK_KEY = 4;
     public static final int FOLDER_CREATE_TASK_KEY = 5;
+    public static final int DOCUMENT_UPDATE_TASK_KEY = 6;
 
     private int folderId;
+    private int updatePosition;
     private Storage mStorage;
 
     private ClickFolderAdapter folderItemRecyclerAdapter;
@@ -169,6 +171,11 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                     Response<Folder> castedResponse = (Response<Folder>) response;
                     folderItemRecyclerAdapter.createFolder(castedResponse.content);
                 });
+            case DOCUMENT_UPDATE_TASK_KEY:
+                getActivity().runOnUiThread(() -> {
+                    Response<Document> castedResponse = (Response<Document>) response;
+                    documentItemRecyclerAdapter.updateDocument(castedResponse.content, updatePosition);
+                });
         }
     }
 
@@ -200,6 +207,9 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
     public void onItemLongClick(View view, int position) {
         documentItemRecyclerAdapter.setChecked(position);
         ((ListActivity)getActivity()).setCheckCount(documentItemRecyclerAdapter.getCheckedCount());
+        ((ListActivity)getActivity()).setName(documentItemRecyclerAdapter.getTitle(position));
+        ((ListActivity)getActivity()).setId(documentItemRecyclerAdapter.getId(position));
+        updatePosition = position;
     }
 
     public void deleteFiles() {
@@ -219,6 +229,13 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
             task = new ApiHandlerTask<>(folderApi.createFolderRoot(new UpdateOrCreateRequest(title)), FOLDER_CREATE_TASK_KEY);
         }
         mStorage.addApiHandlerTask(task, this);
+    }
+
+    public void updateDocument(String title, int id) {
+        ApiHandlerTask<Document> doctask;
+        DocumentApi documentApi = mStorage.getRetrofit().create(DocumentApi.class);
+        doctask = new ApiHandlerTask<>(documentApi.updateDocument(new UpdateOrCreateRequest(title), id), DOCUMENT_UPDATE_TASK_KEY);
+        mStorage.addApiHandlerTask(doctask, this);
     }
 
     public void setUnChecked() {

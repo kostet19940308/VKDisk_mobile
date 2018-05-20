@@ -16,6 +16,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -36,6 +37,6 @@ public interface DocumentApi {
     @POST("/api/v1/documents/?bulk_delete")
     Call<ApiListResponse<Document>> deleteDocument(@Body DocumentDeleteRequest body);
 
-    @PUT("/api/v1/documents/{documentId}/")
-    Call<ApiListResponse<Document>> updateDocument(@Body UpdateOrCreateRequest body);
+    @PUT("/api/v1/documents/{id}/")
+    Call<Document> updateDocument(@Body UpdateOrCreateRequest body, @Path("id") int id);
 }
