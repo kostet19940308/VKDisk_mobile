@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.vkdisk.konstantin.vkdisk_mobile.ListActivity;
@@ -365,7 +366,24 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                         .setProgress((int) ((values[0] / (float) values[1]) * 100));
             }
 
-            ;
+            private String fileExt(String url) {
+                if (url.indexOf("?") > -1) {
+                    url = url.substring(0, url.indexOf("?"));
+                }
+                if (url.lastIndexOf(".") == -1) {
+                    return null;
+                } else {
+                    String ext = url.substring(url.lastIndexOf(".") + 1);
+                    if (ext.indexOf("%") > -1) {
+                        ext = ext.substring(0, ext.indexOf("%"));
+                    }
+                    if (ext.indexOf("/") > -1) {
+                        ext = ext.substring(0, ext.indexOf("/"));
+                    }
+                    return ext.toLowerCase();
+
+                }
+            }
 
             @Override
             protected void onPostExecute(File file) {
@@ -375,12 +393,14 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                 }
                 progressDialog.hide();
                 Intent intent = new Intent();
+                MimeTypeMap myMime = MimeTypeMap.getSingleton();
+                String mimeType = myMime.getMimeTypeFromExtension(fileExt(file.getName()).substring(1));
                 intent.setAction(Intent.ACTION_VIEW);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     Uri contentUri = FileProvider.getUriForFile(getActivity().getApplicationContext(), "com.vkdisk.konstantin.vkdisk_mobile.fileprovider", file);
-                    intent.setData(contentUri);
+                    intent.setDataAndType(contentUri, mimeType);
                 } else {
                     intent.setData(Uri.fromFile(file));
                 }

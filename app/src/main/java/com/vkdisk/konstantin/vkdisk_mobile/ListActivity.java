@@ -253,6 +253,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                         searchView.setIconified(true);
                         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                         toggle.setDrawerIndicatorEnabled(true);
+                        searchView.requestFocus();
                     }
                 });
             }
