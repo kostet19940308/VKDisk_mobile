@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -229,6 +230,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                             break;
                     }
                     editText.setText("");
+                    hideInputMethod();
                 }
                 return false;
             }
@@ -244,6 +246,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 addItem.setVisible(false);
                 toggle.setDrawerIndicatorEnabled(false);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                searchView.requestFocusFromTouch();
                 toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -293,6 +296,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_mail, menu);
         searchItem = menu.findItem(R.id.action_search);
+        searchItem.expandActionView();
         sortItem = menu.findItem(R.id.action_sort);
         sortNameItem = menu.findItem(R.id.action_sort_name);
         sortDateItem = menu.findItem(R.id.action_sort_date);
@@ -358,6 +362,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             toggle.setDrawerIndicatorEnabled(false);
             actionKey = ACTION_FOLDER_CREATE_KEY;
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            showInputMethod();
             toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -365,6 +370,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                     toggle.setDrawerIndicatorEnabled(true);
                     folderList.setUnChecked();
+                    hideInputMethod();
                 }
             });
         } else if (item.equals(editItem)) {
@@ -533,5 +539,25 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     public boolean getIsFolderCheck() {
         return isFolderCheck;
+    }
+
+    /**
+     * прячем программную клавиатуру
+     */
+    protected void hideInputMethod() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        }
+    }
+
+    /**
+     * показываем программную клавиатуру
+     */
+    protected void showInputMethod() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(editText, 0);
+        }
     }
 }
