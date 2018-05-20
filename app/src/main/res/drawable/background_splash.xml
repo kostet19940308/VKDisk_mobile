@@ -7,7 +7,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/logo_mini"/>
+            android:src="@mipmap/logo_large"/>
     </item>
 
 </layer-list>

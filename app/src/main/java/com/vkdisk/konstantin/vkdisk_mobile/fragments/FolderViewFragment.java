@@ -323,8 +323,11 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
                     urlConnection.setDoOutput(true);
                     urlConnection.connect();
                     final File[] appsDir = ContextCompat.getExternalFilesDirs(getActivity(), null);
-                    file = new File(ContextCompat.getExternalFilesDirs(getActivity(), null)[0], documentItemRecyclerAdapter.getTitle(position));
-                    //file = new File(ContextCompat.getExternalFilesDirs(getActivity(), null)[0], documentItemRecyclerAdapter.getTitle(position));
+                    if(appsDir.length == 1){
+                        file = new File(ContextCompat.getExternalFilesDirs(getActivity(), null)[0], documentItemRecyclerAdapter.getTitle(position));
+                    } else {
+                        file = new File(ContextCompat.getExternalFilesDirs(getActivity(), null)[1], documentItemRecyclerAdapter.getTitle(position));
+                    }
                     fos = new FileOutputStream(file);
                     inputStream = urlConnection.getInputStream();
 
