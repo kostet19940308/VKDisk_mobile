@@ -117,11 +117,11 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.dialogs) {
             // в scheduler
             loadChats();
-        } else if (id == R.id.exit) {
-            pref.edit().clear().apply();
-            Intent intent = new Intent(this, SplashActivity.class);
-            startActivity(intent);
-            finish();
+//        } else if (id == R.id.exit) {
+//            pref.edit().clear().apply();
+//            Intent intent = new Intent(this, SplashActivity.class);
+//            startActivity(intent);
+//            finish();
         }
         return true;
     }
