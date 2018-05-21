@@ -407,7 +407,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         searchItem.setVisible(!isEdit);
         addItem.setVisible(!isEdit);
         sortItem.setVisible(!isEdit);
-        editText.setVisibility(isEdit ? View.VISIBLE: View.INVISIBLE);
+        editText.setVisibility(isEdit ? View.VISIBLE: View.GONE);
         if (isEdit){
             editText.requestFocus();
             showInputMethod();
