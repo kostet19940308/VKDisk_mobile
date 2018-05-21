@@ -199,6 +199,8 @@ public class Storage implements ICallBackOnApiTaskFinished {
         CookieStore cookieStore = cookieManager.getCookieStore();
         List<HttpCookie> cookies = HttpCookie.parse(cookieString);
         for (HttpCookie cookie : cookies) {
+            cookie.setPath("/");
+            cookie.setDomain(uri.getHost());
             cookieStore.add(uri, cookie);
         }
     }
