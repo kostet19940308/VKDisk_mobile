@@ -322,7 +322,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         cross.setVisible(false);
         checked.setVisible(false);
         trash.setVisible(false);
-        editText.setVisibility(View.INVISIBLE);
+        editText.setVisibility(View.GONE);
         // Тут надо добавить если выделяется хотя бы один файл, появляется возможность удалить их,
         // Переименовать, если выделен только один файл, в перспективе переместить в папку
         // Изменящиеся хрени в toolbar надо сунуть в menu_main
@@ -515,6 +515,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         if (checkCount == 0) {
             isDocCheck = false;
             isFolderCheck = false;
+            trash.setVisible(false);
         }
         if (this.checkCount == 1) {
             if (isDocCheck) {
