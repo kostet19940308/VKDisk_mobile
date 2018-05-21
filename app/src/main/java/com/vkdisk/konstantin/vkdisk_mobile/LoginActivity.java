@@ -97,6 +97,11 @@ public class LoginActivity extends AppCompatActivity implements Storage.DataSubs
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
             if (url.startsWith(redirectUrl)) {
+                cookies = CookieManager.getInstance().getCookie(loginUrl);
+
+                mStorage.addCookiesFromString(URI.create(getString(R.string.basic_url)), cookies);
+                Log.d(LOG_TAG, "All the cookies in a string:" + cookies);
+
                 url.indexOf("#");
                 String substring = url.substring(url.indexOf("#") + 1, url.length());
                 String[] urls = substring.split("&");
@@ -115,10 +120,6 @@ public class LoginActivity extends AppCompatActivity implements Storage.DataSubs
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            cookies = CookieManager.getInstance().getCookie(loginUrl);
-
-            mStorage.addCookiesFromString(URI.create(getString(R.string.basic_url)), cookies);
-            Log.d(LOG_TAG, "All the cookies in a string:" + cookies);
         }
 
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
