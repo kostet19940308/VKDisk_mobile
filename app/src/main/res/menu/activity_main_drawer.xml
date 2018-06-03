@@ -11,9 +11,9 @@
             android:icon="@mipmap/folder"
             android:checked="false"
             android:title="Dialogs" />
-        <!--<item-->
-            <!--android:id="@+id/exit"-->
-            <!--android:checked="false"-->
-            <!--android:title="Exit" />-->
+        <item
+            android:id="@+id/exit"
+            android:checked="false"
+            android:title="Exit" />
     </group>
 </menu>

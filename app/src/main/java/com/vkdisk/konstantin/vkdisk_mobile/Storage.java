@@ -229,4 +229,9 @@ public class Storage implements ICallBackOnApiTaskFinished {
 
     }
 
+    public void clearCookies()
+    {
+        cookieManager.getCookieStore().removeAll();
+    }
+
 }

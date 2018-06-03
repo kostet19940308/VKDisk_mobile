@@ -202,6 +202,7 @@ public class FolderViewFragment extends Fragment implements Storage.DataSubscrib
         bundle.putInt(FOLDER_ID_BUNDLE_KEY, folderItemRecyclerAdapter.getFolderId(position));
         FolderViewFragment folderViewFragment = new FolderViewFragment();
         ((ListActivity)getActivity()).setFolderList(folderViewFragment);
+        ((ListActivity)getActivity()).setCheckCount(0);
         folderViewFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment, folderViewFragment);
         fragmentTransaction.addToBackStack(null);
